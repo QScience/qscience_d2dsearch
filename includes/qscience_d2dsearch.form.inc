@@ -131,6 +131,49 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
 }
 
 
+/**
+ * Menu callback; output the results of a search as a JSON object.
+ *
+ * @see  _qscience_d2dsearch_get_new_results()
+ */
+function qscience_d2dsearch_get_results() {
+  $ids_displayed = '';
+  $new_results = '';
+  if (isset($_POST['query_id'])) {
+    $query_id = check_plain($_POST['query_id']);
+    if (_d2dsearch_check_query_id($query_id)) {
+      if (isset($_POST['ids'])) {
+        $ids = check_plain($_POST['ids']);
+      }
+      else {
+        $ids = '';
+      }
+      $ids = d2d_explode($ids);
+      if ($ids === FALSE) {
+        $ids = array();
+      }
+      $new_results = _qscience_d2dsearch_get_new_results($query_id, $ids);
+      $ids_displayed = d2d_implode($ids);
+    }
+  }
+  drupal_json_output(array(
+    'ids' => $ids_displayed,
+    'new_results' => $new_results,
+  ));
+}
+
+
+/**
+ * Fetches and formats new results that have been asyncronously added to db.
+ *
+ * @param string $query_id
+ *   The id of the query of interest.
+ * @param array $ids
+ *   Array of ids of results already fetched.
+ *
+ * @return string $output
+ *   Formatted output string to be sent out.
+ */
 function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
   if (!_d2dsearch_lock_acquire('d2dsearch_query_cache', D2DSEARCH_ACQUIRE_TIMEOUT)) {
     return;
@@ -170,7 +213,6 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
     foreach ($results as $result) {
       $exploded_result = d2d_explode($result);
       if ($exploded_result !== FALSE && d2d_check_array($exploded_result, array('title' => 'is_string', 'time' => 'd2d_check_convert_int', 'name' => 'is_string'))) {
-        //$output .= '<div style="border:1px solid #ccc; margin:5px; padding:5px">';
         $output .= '<div style="border:1px dashed #f00; margin:5px; padding:5px">';
         $output .= '<b>' . check_plain($exploded_result['name']) . '</b>';
         $output .= ' ';
@@ -182,27 +224,4 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
     }
   }
   return $output;
-}
-function qscience_d2dsearch_get_results() {
-  $ids_displayed = '';
-  $new_results = '';
-  if (isset($_POST['query_id']) && _d2dsearch_check_query_id($_POST['query_id'])) {
-    if (isset($_POST['ids'])) {
-      $ids = $_POST['ids'];
-    }
-    else {
-      $ids = '';
-    }
-    $ids = d2d_explode($ids);
-    if ($ids === FALSE) {
-      $ids = array();
-    }
-    $new_results = _qscience_d2dsearch_get_new_results($_POST['query_id'], $ids);
-    $ids_displayed = d2d_implode($ids);
-  }
-  $array = array(
-    'ids' => $ids_displayed,
-    'new_results' => $new_results,
-  );
-  drupal_json_output($array);
 }
