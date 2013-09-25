@@ -9,35 +9,74 @@
 /**
  * Performs the search.
  */
-function _qscience_d2dsearch_papers_get() {
-  $news = array(
-    array('title' => 'News mining might have predicted Arab Spring', 'time' => 1315915200),
-    array('title' => 'When We\'re Cowed by the Crowd', 'time' => 1306584000),
-    array('title' => 'A More Human Virtual Crowd.  A new vision-based approach could help prevent crowd disasters.', 'time' => 1303300800),
-    array('title' => 'Earth project aims to \'simulate everything\'', 'time' => 1293537600),
-    array('title' => 'Towards a socio-economic knowledge accelerator', 'time' => 1249473600),
-  );
+function _qscience_d2dsearch_papers_get($imploded_query) {
 
-  return $news;
-  //$query = db_select('d2d_public_keys', 'k')
-  //    ->fields('k')
-  //    ->condition('k.id', $id);
 
+  $exploded_query = d2d_explode($imploded_query);
+  if ($exploded_query === FALSE) {
+    return FALSE;
+  }
+
+  $search_string = $exploded_query['search_string'];
+  $query = new EntityFieldQuery();
+
+  $from = $exploded_query['date_from'];
+  $to = $exploded_query['date_to'];
+
+  $query = new EntityFieldQuery();
+  // Query explanation:
+  // status == 1 means "published" (visible to non-admins).
+  $query->entityCondition('entity_type', 'node')
+        ->entityCondition('bundle', 'paper')
+        ->propertyCondition('status', 1)
+        ->propertyCondition('title', '%' . db_like($search_string) . '%', 'LIKE')
+        ->propertyOrderBy('created', 'DESC');
+
+  if ($from != $to) {
+    $query
+      ->propertyCondition('created', array($from, $to), 'BETWEEN');
+  }
+  else {
+    $query
+      ->propertyCondition('created', '=', $from);
+  }
+
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $items_nids = array_keys($result['node']);
+    $items = entity_load('node', $items_nids);
+  }
+
+  $out = array();
+  // TODO: load other fields, like author reference.
+  // TODO: maybe move this for where we set the name of the instance as well.
+  foreach($items as $item) {
+    $abstract = empty($item->abstract) ? 'no abstract' : $item->abstract['und']['value'];
+    $out[] = array(
+      'title' => $item->title,
+      'abstract' => $abstract,
+      'time' => $item->created,
+    );
+  }
+
+  return $out;
 }
 
-function _qscience_d2dsearch_papers_callback($query) {
+function _qscience_d2dsearch_papers_callback($imploded_query) {
   watchdog('d2dsearch', '_qscience_d2dsearch_papers_callback executed.');
 
+  $papers = _qscience_d2dsearch_papers_get($imploded_query);
+  if (empty($papers)) {
+    return FALSE;
+  }
   $my_instance = d2d_api_own_instance_get();
   $my_name = $my_instance['name'];
-  $news = _qscience_d2dsearch_papers_get();
   $result_array = array();
-  $query = strtolower($query);
-  foreach ($news as $record) {
-    if (strpos(strtolower($record['title']), $query) !== FALSE) {
-      $record['name'] = $my_name;
-      $result_array[] = d2d_implode($record);
-    }
+
+  foreach ($papers as $record) {
+    $record['name'] = $my_name;
+    $result_array[] = d2d_implode($record);
   }
 
   watchdog('qscience_d2dsearch', 'returning: ' . var_export($result_array, TRUE));

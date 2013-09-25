@@ -59,7 +59,7 @@ function qscience_d2dsearch_form_search() {
     '#required' => TRUE,
   );
 
-  $form['contenttype'] = array(
+  $form['content_type'] = array(
     '#type' => 'select',
     '#title' => t('Content type.'),
     '#options' => array(
@@ -70,9 +70,9 @@ function qscience_d2dsearch_form_search() {
     '#required' => TRUE,
   );
 
-  $form['searchtype'] = array(
+  $form['search_type'] = array(
     '#type' => 'select',
-    '#title' => t('Content type.'),
+    '#title' => t('Search type.'),
     '#options' => array(
       'single_friend' => t('Single Friend'),
       'all_friends' => t('All Friends'),
@@ -86,7 +86,12 @@ function qscience_d2dsearch_form_search() {
   $form['date_from'] = array(
     '#type' => 'date',
     '#title' => t('From'),
-    '#description' => t('Include only content more recent than this date'),
+    '#description' => t('Include only content created after this date.'),
+    '#default_value' => array(
+      'year' => 1970,
+      'month' => 1,
+      'day' => 1,
+    ),
     '#required' => TRUE,
   );
 
@@ -109,15 +114,47 @@ function qscience_d2dsearch_form_search() {
  * Form validation handler for qscience_d2dsearch_form_search().
  */
 function qscience_d2dsearch_form_search_validate($form, &$form_state) {
-  // TODO
+  $fromArray = $form_state['values']['date_from'];
+  $fromTS = mktime(0, 0, 0,
+            intval($fromArray['month']),
+            intval($fromArray['day']),
+            intval($fromArray['year']));
+
+  $now = mktime();
+  if ($fromTS > $now) {
+    form_set_error('date_from', t('From date cannot be in the future.'));
+  }
+
+  $toArray = $form_state['values']['date_to'];
+  $toTS = mktime(0, 0, 0, $toArray['month'], $toArray['day'], $toArray['year']);
+
+  if ($fromTS > $toTS) {
+    form_set_error('to_from', t('To date cannot preceed From date.'));
+  }
+
+  $form_state['values']['date_from'] = $fromTS;
+  $form_state['values']['date_to'] = $toTS;
 }
 
 /**
  * Form submission handler for qscience_d2dsearch_form_search().
  */
 function qscience_d2dsearch_form_search_submit($form, &$form_state) {
-  // TODO: serialize conditions and query string into one string
-  $query_id = d2dsearch_query_start('qscience_d2dsearch_papers', $form_state['values']['search_string']);
+  $query_array = array(
+    'search_string' => $form_state['values']['search_string'],
+    'content_type' => $form_state['values']['content_type'],
+    'search_type' => $form_state['values']['search_type'],
+    'date_from' => $form_state['values']['date_from'],
+    'date_to' => $form_state['values']['date_to'],
+  );
+
+  $imploded_query = d2d_implode($query_array);
+  if ($imploded_query === FALSE) {
+    drupal_set_message(t('An error occurred while preparing the query to send out. Search aborted.', 'error'));
+    return;
+  }
+
+  $query_id = d2dsearch_query_start('qscience_d2dsearch_papers', $imploded_query);
 
   if (!_d2dsearch_check_query_id($query_id)) {
     drupal_set_message(t('Failed performing search.'));
@@ -134,7 +171,7 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
 /**
  * Menu callback; output the results of a search as a JSON object.
  *
- * @see  _qscience_d2dsearch_get_new_results()
+ * @see _qscience_d2dsearch_get_new_results()
  */
 function qscience_d2dsearch_get_results() {
   $ids_displayed = '';
@@ -212,13 +249,25 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
     }
     foreach ($results as $result) {
       $exploded_result = d2d_explode($result);
-      if ($exploded_result !== FALSE && d2d_check_array($exploded_result, array('title' => 'is_string', 'time' => 'd2d_check_convert_int', 'name' => 'is_string'))) {
+      if ($exploded_result !== FALSE) {
+        $check = d2d_check_array($exploded_result, array(
+          'title' => 'is_string',
+          'abstract' => 'is_string',
+          'time' => 'd2d_check_convert_int',
+          'name' => 'is_string',
+        ));
+        if (!$check) {
+          // TODO: log it.
+          continue;
+        }
         $output .= '<div style="border:1px dashed #f00; margin:5px; padding:5px">';
         $output .= '<b>' . check_plain($exploded_result['name']) . '</b>';
         $output .= ' ';
         $output .= date('F j, Y', $exploded_result['time']);
         $output .= '<br/>';
         $output .= check_plain($exploded_result['title']);
+        $output .= '<br/>';
+        $output .= check_plain($exploded_result['abstract']);
         $output .= '</div>';
       }
     }
