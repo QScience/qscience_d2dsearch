@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * D2D Search module.
+ */
+
+require_once 'includes/qscience_d2dsearch.form.inc';
+require_once 'includes/qscience_d2dsearch.news.inc';
+
+/**
+ * Implements hook_menu_alter().
+ */
+function qscience_d2dsearch_menu() {
+  $items['qscience_search'] = array(
+    'title' => 'QScience Search',
+    'page callback' => 'qscience_d2dsearch_main',
+    'access arguments' => array('administer d2dsearch demo'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 80,
+  );
+  $items['admin/d2d/search/demo/news/get_result'] = array(
+    'page callback' => 'qscience_d2dsearch_get_results',
+    'access arguments' => array('administer d2dsearch demo'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function qscience_d2dsearch_permission() {
+  return array(
+    'use qscience d2d search' => array(
+      'title' => t('Use QScience D2D search'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_d2dsearch_query_type().
+ */
+function qscience_d2dsearch_d2dsearch_query_type() {
+  $types = array();
+  $types['qscience_d2dsearch_news'] = array(
+    'callback' => '_qscience_d2dsearch_news_callback',
+  );
+  $types['qscience_d2dsearch_papers'] = array(
+    'callback' => '_qscience_d2dsearch_papers_callback',
+  );
+
+  return $types;
+}

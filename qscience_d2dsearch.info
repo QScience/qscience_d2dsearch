@@ -1,0 +1,7 @@
+name = QScience D2D Search
+description = Scans your network of friends, and friends of friends for interesting publications, news, etc.
+package = D2D
+core = 7.x
+dependencies[] = qscience
+dependencies[] = d2d
+dependencies[] = d2dsearch

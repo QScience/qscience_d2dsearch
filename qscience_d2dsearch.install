@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Installation file for QScience D2D Search.
+ */
+
+/**
+ * Implements hook_install()
+ */
+function qscience_d2dsearch_install() {
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function qscience_d2dsearch_uninstall() {
+}
