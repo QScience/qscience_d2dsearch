@@ -6,7 +6,7 @@
  */
 
 require_once 'includes/qscience_d2dsearch.form.inc';
-require_once 'includes/qscience_d2dsearch.news.inc';
+require_once 'includes/qscience_d2dsearch.papers.inc';
 
 /**
  * Implements hook_menu_alter().
@@ -19,7 +19,7 @@ function qscience_d2dsearch_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 80,
   );
-  $items['admin/d2d/search/demo/news/get_result'] = array(
+  $items['qscience_search/get_result'] = array(
     'page callback' => 'qscience_d2dsearch_get_results',
     'access arguments' => array('administer d2dsearch demo'),
     'type' => MENU_CALLBACK,
@@ -43,9 +43,6 @@ function qscience_d2dsearch_permission() {
  */
 function qscience_d2dsearch_d2dsearch_query_type() {
   $types = array();
-  $types['qscience_d2dsearch_news'] = array(
-    'callback' => '_qscience_d2dsearch_news_callback',
-  );
   $types['qscience_d2dsearch_papers'] = array(
     'callback' => '_qscience_d2dsearch_papers_callback',
   );

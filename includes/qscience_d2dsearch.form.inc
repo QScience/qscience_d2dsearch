@@ -106,10 +106,19 @@ function qscience_d2dsearch_form_search() {
 }
 
 /**
+ * Form validation handler for qscience_d2dsearch_form_search().
+ */
+function qscience_d2dsearch_form_search_validate($form, &$form_state) {
+  // TODO
+}
+
+/**
  * Form submission handler for qscience_d2dsearch_form_search().
  */
 function qscience_d2dsearch_form_search_submit($form, &$form_state) {
-  $query_id = d2dsearch_query_start('qscience_d2dsearch_news', $form_state['values']['search_string']);
+  // TODO: serialize conditions and query string into one string
+  $query_id = d2dsearch_query_start('qscience_d2dsearch_papers', $form_state['values']['search_string']);
+
   if (!_d2dsearch_check_query_id($query_id)) {
     drupal_set_message(t('Failed performing search.'));
   }
@@ -120,10 +129,13 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     drupal_add_js(drupal_get_path('module', 'qscience_d2dsearch') . '/js/search.js');
   }
 }
+
+
 function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
   if (!_d2dsearch_lock_acquire('d2dsearch_query_cache', D2DSEARCH_ACQUIRE_TIMEOUT)) {
     return;
   }
+
   $db_result = db_query('SELECT qid as qid, instance_id as instance_id FROM {d2dsearch_query_cache} WHERE query_id=:query_id', array(':query_id' => $query_id));
   if ($record = $db_result->fetchObject()) {
     $qid = $record->qid;
