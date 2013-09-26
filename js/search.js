@@ -5,12 +5,23 @@
 jQuery(document).ready(function(){
     var forceStop, ids, INCREMENT;
     var resultDiv, progressDiv, table;
-    var progressbar;
+    var progressbar, console;
+    var db;
 
-    INCREMENT = 5;
+    db = new NDDB();
 
-    forceStop = false, counter = 0, ids = "";
+    db.on('insert', function(o) {
+        addResult(o, db.length);
+    });
+
+    INCREMENT = 10;
+    forceStop = false;
+    ids = "";
+
     resultDiv = document.getElementById('qscience_d2dsearch_results');
+
+    myConsole = document.getElementById('console');
+    myConsole.style.display = '';
 
     progressbar = jQuery( "#progressbar" );
     progressbar.toggle();
@@ -28,17 +39,28 @@ jQuery(document).ready(function(){
     function progress() {
         var val = progressbar.progressbar( "value" ) || 0;
         progressbar.progressbar( "value", val + INCREMENT );
-        //if ( val < 99 ) {
-        //    setTimeout( progress, 100 );
-        //}
     }
 
-    function addResult(data) {
+    function log(level, text) {
+        var args = {
+            '!level': level,
+            '%pre': { 'class': level }
+        };
+        JSUS.sprintf('%pre!level - ' + text + '%pre', args, myConsole);
+        // Scroll to keep the last line always visible.
+        myConsole.scrollTop = myConsole.scrollHeight
+    }
+
+    function addResult(data, idx) {
         var div, friend, content, actions;
         var title;
 
         // Creating the div container.
         div = document.createElement('div');
+
+        // Will use this id to refine search;
+        div.id = "qsr_" + idx;
+
         div.className = 'qscience_search_result';
 
         // Creating 3 nested divs;
@@ -56,7 +78,7 @@ jQuery(document).ready(function(){
 
         title = document.createElement('h2');
         title.className =  'qscience_search_result_title';
-        title.appendChile(document.createTextNode(data.title));
+        title.appendChild(document.createTextNode(data.title));
 
         content.appendChild(title);
         content.appendChild(document.createTextNode(data.abstract));
@@ -80,21 +102,26 @@ jQuery(document).ready(function(){
             success: function(data) {
                 var i, len;
 
-                if (!data || !data.ids || !data.new_results) {
-                    console.log('Error');
-                    // Ignore corrupted results.
+                // Update the progress bar.
+                progress();
+
+                if (!data) {
+                    log('error', 'no data received');
                     return;
                 }
-                console.log(data.new_results);
+                if (!data.ids || !data.new_results) {
+                    log('silly', 'no new data');
+                    return;
+                }
+
+                log('info', 'new data received');
+
                 ids = data.ids;
 
                 len = data.new_results.length;
                 for (i = 0; i < len; i++){
-                    addResults(data.new_results[i]);
+                    db.insert(data.new_results[i]);
                 }
-
-                // Update the progress bar.
-                progress();
             },
             error: function() {
                 // debugger;

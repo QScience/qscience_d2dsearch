@@ -35,7 +35,7 @@ function qscience_d2dsearch_main() {
 
   $build['main'][] = drupal_get_form('qscience_d2dsearch_form_search');
   $build['results'] = array(
-    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Searching...</div></div><div id="qscience_d2dsearch_results"></div>',
+    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Searching...</div></div><div id="console" style="display: none"></div><div id="qscience_d2dsearch_results"></div>',
    );
   return $build;
 }
@@ -183,9 +183,12 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
   else {
     $form_state['rebuild'] = TRUE;
 
+    $path = drupal_get_path('module', 'qscience_d2dsearch');
     drupal_add_library('system', 'ui.progressbar');
     drupal_add_js(array('query_id' => $query_id), 'setting');
-    drupal_add_js(drupal_get_path('module', 'qscience_d2dsearch') . '/js/search.js');
+    drupal_add_js($path . '/js/nddb-full.js');
+    drupal_add_js($path . '/js/sprintf.js');
+    drupal_add_js($path . '/js/search.js');
   }
 }
 

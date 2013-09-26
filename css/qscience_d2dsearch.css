@@ -44,6 +44,40 @@ input#edit-search-string {
 }
 
 
+/* Console */
+
+div#console {
+    margin-top: 5px;
+    margin-bottom: 20px;
+    height: 50px;
+    width: 100%;
+    overflow: auto;
+    font-family: monospace;
+    background: #FFC;
+    border: 1px dotted #CCC;
+}
+
+div#console span {
+    display: block;
+    border-bottom: 1px solid white;
+    margin-bottom: 0;
+    clear: both;
+}
+
+div#console span.info {
+
+}
+
+div#console span.error {
+    background: #CFF;
+}
+
+div#console span.silly {
+    //display: none;
+}
+
+
+
 /* Search Progress Bar */
 
 .ui-progressbar {
@@ -57,3 +91,5 @@ input#edit-search-string {
     font-weight: bold;
     text-shadow: 1px 1px 0 #fff;
 }
+
+/*
