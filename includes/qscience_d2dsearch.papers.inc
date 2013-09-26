@@ -67,7 +67,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   foreach($items as $item) {
     $abstract = empty($item->abstract) ? 'no abstract' : $item->abstract['und'][0]['value'];
     $record = array(
-      'name' => $my_name,
+      'friend' => $my_name,
       'title' => $item->title,
       'abstract' => $abstract,
       'time' => $item->created,

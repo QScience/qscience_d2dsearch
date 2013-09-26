@@ -28,9 +28,9 @@ jQuery(document).ready(function(){
     function progress() {
         var val = progressbar.progressbar( "value" ) || 0;
         progressbar.progressbar( "value", val + INCREMENT );
-        if ( val < 99 ) {
-            setTimeout( progress, 100 );
-        }
+        //if ( val < 99 ) {
+        //    setTimeout( progress, 100 );
+        //}
     }
 
     function addResult(data) {
