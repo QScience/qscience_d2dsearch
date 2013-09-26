@@ -19,10 +19,10 @@ function _qscience_d2dsearch_papers_get($imploded_query) {
 
   $search_string = $exploded_query['search_string'];
   $query = new EntityFieldQuery();
-
+  
   $from = $exploded_query['date_from'];
   $to = $exploded_query['date_to'];
-
+  
   $query = new EntityFieldQuery();
   // Query explanation:
   // status == 1 means "published" (visible to non-admins).
@@ -52,7 +52,7 @@ function _qscience_d2dsearch_papers_get($imploded_query) {
   // TODO: load other fields, like author reference.
   // TODO: maybe move this for where we set the name of the instance as well.
   foreach($items as $item) {
-    $abstract = empty($item->abstract) ? 'no abstract' : $item->abstract['und']['value'];
+    $abstract = empty($item->abstract) ? 'no abstract' : $item->abstract['und'][0]['value'];
     $out[] = array(
       'title' => $item->title,
       'abstract' => $abstract,
