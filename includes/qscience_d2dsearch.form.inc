@@ -270,13 +270,13 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
       $exploded_result = d2d_explode($result);
       if ($exploded_result !== FALSE) {
         $check = d2d_check_array($exploded_result, array(
+          'name' => 'is_string',
           'title' => 'is_string',
           'abstract' => 'is_string',
           'time' => 'd2d_check_convert_int',
-          'name' => 'is_string',
         ));
         if (!$check) {
-          // TODO: log it.
+          watchdog('qscience_d2dsearch', 'Received malformed result: ' . $result);
           continue;
         }
         $output .= '<div style="border:1px dashed #f00; margin:5px; padding:5px">';
