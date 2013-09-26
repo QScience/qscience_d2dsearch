@@ -56,7 +56,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   watchdog('d2dsearch', '_qscience_d2dsearch_papers_callback executed.');
 
   $items = _qscience_d2dsearch_papers_get($imploded_query);
-  if (empty($papers)) {
+  if (empty($items)) {
     return FALSE;
   }
   $my_instance = d2d_api_own_instance_get();
