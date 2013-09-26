@@ -42,3 +42,18 @@ input#edit-search-string {
     padding: 5px;
     width: 60%;
 }
+
+
+/* Search Progress Bar */
+
+.ui-progressbar {
+    position: relative;
+}
+
+.progress-label {
+    position: absolute;
+    left: 50%
+    top: 4px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}

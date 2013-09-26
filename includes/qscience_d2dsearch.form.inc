@@ -11,15 +11,16 @@ define('QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH', 64);
  * Menu callback; builds the search page.
  */
 function qscience_d2dsearch_main() {
+
+  drupal_add_css(drupal_get_path('module', 'qscience_d2dsearch') . '/css/qscience_d2dsearch.css');
+
   $build['main'] = array(
     '#title' => t('Search for papers, and other relevant content in your friends network.'),
     '#type' => 'fieldset',
   );
 
-  drupal_add_css(drupal_get_path('module', 'qscience_d2dsearch') . '/css/qscience_d2dsearch.css');
-
+  // If there are no friends, disable the search. (TODO: keep local search only).
   $friends = d2d_api_friend_get();
-
   if (empty($friends)) {
     drupal_set_message(t('QScience Search disabled.'), 'warning');
     $build['main']['disabled'] = array(
@@ -34,8 +35,8 @@ function qscience_d2dsearch_main() {
 
   $build['main'][] = drupal_get_form('qscience_d2dsearch_form_search');
   $build['results'] = array(
-    '#markup' => '<div id="qscience_d2dsearch_progress"></div><div id="qscience_d2dsearch_results"></div>',
-  );
+    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Searching...</div></div><div id="qscience_d2dsearch_results"></div>',
+   );
   return $build;
 }
 
@@ -181,6 +182,8 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
   }
   else {
     $form_state['rebuild'] = TRUE;
+
+    drupal_add_library('system', 'ui.progressbar');
     drupal_add_js(array('query_id' => $query_id), 'setting');
     drupal_add_js(drupal_get_path('module', 'qscience_d2dsearch') . '/js/search.js');
   }
@@ -259,7 +262,7 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
   if (empty($records)) {
     return '';
   }
-  $output = '';
+  $out = array();
   foreach ($records as $record) {
     $ids[] = $record->id;
     $results = d2d_explode($record->result);
@@ -270,7 +273,7 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
       $exploded_result = d2d_explode($result);
       if ($exploded_result !== FALSE) {
         $check = d2d_check_array($exploded_result, array(
-          'name' => 'is_string',
+          'friend' => 'is_string',
           'title' => 'is_string',
           'abstract' => 'is_string',
           'time' => 'd2d_check_convert_int',
@@ -279,19 +282,20 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
           watchdog('qscience_d2dsearch', 'Received malformed result: ' . $result);
           continue;
         }
-        $output .= '<div style="border:1px dashed #f00; margin:5px; padding:5px">';
-        $output .= '<b>' . check_plain($exploded_result['name']) . '</b>';
-        $output .= ' ';
-        $output .= date('F j, Y', $exploded_result['time']);
-        $output .= '<br/>';
-        $output .= check_plain($exploded_result['title']);
-        $output .= '<br/>';
-        $output .= check_plain($exploded_result['abstract']);
-        $output .= '</div>';
+        $out[] = $exploded_result;
+//        $output .= '<div style="border:1px dashed #f00; margin:5px; padding:5px">';
+//        $output .= '<b>' . check_plain($exploded_result['name']) . '</b>';
+//        $output .= ' ';
+//        $output .= date('F j, Y', $exploded_result['time']);
+//        $output .= '<br/>';
+//        $output .= check_plain($exploded_result['title']);
+//        $output .= '<br/>';
+//        $output .= check_plain($exploded_result['abstract']);
+//        $output .= '</div>';
       }
     }
   }
-  return $output;
+  return $out;
 }
 
 ///**
