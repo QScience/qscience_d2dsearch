@@ -43,12 +43,11 @@ function _qscience_d2dsearch_papers_get($imploded_query) {
 
   $result = $query->execute();
 
+  $items = array();
   if (isset($result['node'])) {
     $items_nids = array_keys($result['node']);
     $items = entity_load('node', $items_nids);
   }
-
-
 
   return $items;
 }
@@ -56,7 +55,7 @@ function _qscience_d2dsearch_papers_get($imploded_query) {
 function _qscience_d2dsearch_papers_callback($imploded_query) {
   watchdog('d2dsearch', '_qscience_d2dsearch_papers_callback executed.');
 
-  $papers = _qscience_d2dsearch_papers_get($imploded_query);
+  $items = _qscience_d2dsearch_papers_get($imploded_query);
   if (empty($papers)) {
     return FALSE;
   }
