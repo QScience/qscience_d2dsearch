@@ -10,3 +10,35 @@ span#whatsup {
 div#discoverd2d {
     margin-top: 20px;
 }
+
+div#qscience_d2dsearch_main_form {
+    margin-bottom: 30px;
+    border: 1px solid #CCC;
+}
+
+div#qscience_d2dsearch_centered {
+    text-align: center;
+    margin: auto;
+    border: 1px solid green;
+    width: auto;
+    height: auto;
+}
+
+div#qscience_d2dsearch_searchbar {
+    border: 1px solid red;
+}
+
+div#qscience_d2dsearch_searchbar input {
+    display: inline;
+    float: left;
+}
+
+div#qscience_d2dsearch_searchbar select {
+    display: inline;
+    float: left;
+}
+
+input#edit-search-string {
+    padding: 5px;
+    width: 60%;
+}

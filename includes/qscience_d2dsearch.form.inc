@@ -1,20 +1,9 @@
 <?php
-
-
 /**
  * @file
  *
  * Builds and displays the necessary forms for the search page.
  */
-
-/**
-
-   CHECK THIS
-
-   Drupal automatically provides path based overrides; so if the path to your
-   custom page is, say, 'custom/page/path' you can create a template file called
-   'page--custom--page--path.tpl.php`, which will only be used for that page.
-*/
 
 define('QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH', 64);
 
@@ -44,6 +33,9 @@ function qscience_d2dsearch_main() {
   }
 
   $build['main'][] = drupal_get_form('qscience_d2dsearch_form_search');
+  $build['results'] = array(
+    '#markup' => '<div id="qscience_d2dsearch_progress"></div><div id="qscience_d2dsearch_results"></div>',
+  );
   return $build;
 }
 
@@ -51,17 +43,23 @@ function qscience_d2dsearch_main() {
  * Form constructor for search interface.
  */
 function qscience_d2dsearch_form_search() {
-  $form['search_string'] = array(
+
+  $form['search_container'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+
+  $form['search_container']['search_string'] = array(
     '#type' => 'textfield',
-    '#title' => t('Your query string'),
+    //'#title' => t('Your query string'),
     '#size' => 40,
     '#maxlength' => QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH,
     '#required' => TRUE,
   );
 
-  $form['content_type'] = array(
+  $form['search_container']['content_type'] = array(
     '#type' => 'select',
-    '#title' => t('Content type.'),
+    //'#title' => t('Content type.'),
     '#options' => array(
       'papers' => t('Papers'),
       'news' => t('News'),
@@ -70,7 +68,26 @@ function qscience_d2dsearch_form_search() {
     '#required' => TRUE,
   );
 
-  $form['search_type'] = array(
+  $form['search_container']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search'),
+  );
+
+  $form['advanced'] =  array(
+    '#title' => t('Advanced options.'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['advanced']['local_search'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Include local results'),
+    //'#description' => t('Include local results'),
+    '#default_value' => 0,
+  );
+
+  $form['advanced']['search_type'] = array(
     '#type' => 'select',
     '#title' => t('Search type.'),
     '#options' => array(
@@ -83,10 +100,15 @@ function qscience_d2dsearch_form_search() {
     '#required' => TRUE,
   );
 
-  $form['date_from'] = array(
+  $form['advanced']['date_container'] = array(
+    '#type' => 'container',
+    //'#attributes' => array('class' => array('container-inline')),
+  );
+
+  $form['advanced']['date_container']['date_from'] = array(
     '#type' => 'date',
     '#title' => t('From'),
-    '#description' => t('Include only content created after this date.'),
+    //'#description' => t('Include only content created after this date.'),
     '#default_value' => array(
       'year' => 1970,
       'month' => 1,
@@ -95,18 +117,13 @@ function qscience_d2dsearch_form_search() {
     '#required' => TRUE,
   );
 
-  $form['date_to'] = array(
+  $form['advanced']['date_container']['date_to'] = array(
     '#type' => 'date',
     '#title' => t('To'),
-    '#description' => t('Include in the search results content created up to this date.'),
+    //'#description' => t('Include in the search results content created up to this date.'),
     '#required' => TRUE,
   );
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Search'),
-    '#suffix' => '<div id="qscience_d2dsearch_progress"></div><div id="qscience_d2dsearch_results"></div>',
-  );
   return $form;
 }
 
@@ -126,7 +143,7 @@ function qscience_d2dsearch_form_search_validate($form, &$form_state) {
   }
 
   $toArray = $form_state['values']['date_to'];
-  $toTS = mktime(0, 0, 0, $toArray['month'], $toArray['day'], $toArray['year']);
+  $toTS = mktime(24, 0, 0, $toArray['month'], $toArray['day'], $toArray['year']);
 
   if ($fromTS > $toTS) {
     form_set_error('to_from', t('To date cannot preceed From date.'));
@@ -154,7 +171,10 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     return;
   }
 
-  $query_id = d2dsearch_query_start('qscience_d2dsearch_papers', $imploded_query);
+  $query_id = d2dsearch_query_start('qscience_d2dsearch_papers',
+              $imploded_query,
+              $form_state['values']['local_search']
+  );
 
   if (!_d2dsearch_check_query_id($query_id)) {
     drupal_set_message(t('Failed performing search.'));
@@ -162,7 +182,6 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
   else {
     $form_state['rebuild'] = TRUE;
     drupal_add_js(array('query_id' => $query_id), 'setting');
-    drupal_add_js('http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', 'external');
     drupal_add_js(drupal_get_path('module', 'qscience_d2dsearch') . '/js/search.js');
   }
 }
@@ -274,3 +293,46 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
   }
   return $output;
 }
+
+///**
+// * Implements hook_theme().
+// */
+//function qscience_d2dsearch_theme() {
+//	return array(
+//		'qscience_d2dsearch_form_search' => array(
+//			'render element' => 'form'
+//		),
+//	);
+//}
+//
+///**
+// * Theme function.
+// *
+// * The theme function has the same name as the form,
+// * so will automatically be called when rendering the form.
+// */
+//function theme_qscience_d2dsearch_form_search($variables) {
+//	// Isolate the form definition form the $variables array
+//	$form = $variables['form'];
+//	$output = '<h2>' . t('Please enter your information below') . '</h2>';
+//	// Put the entire structure into a div that can be used for
+//	// CSS purposes
+//	$output .= '<div id="qscience_d2dsearch_main_form">';
+//  $output .= '<div id="qscience_d2dsearch_searchbar">';
+//	$output .= drupal_render($form['search_string']);
+//  $output .= '</div>';
+//  $output .= '<div id="qscience_d2dsearch_centered">';
+//	$output .= drupal_render($form['content_type']);
+//  $output .= drupal_render($form['search_type']);
+//  $output .= drupal_render($form['submit']);
+//  $output .= '</div>';
+//  $output .= '</div>';
+//  $output .= '<div id="qscience_d2dsearch_advanced">';
+//
+//  $output .= '</div>';
+//
+//	// Pass the remaining form elements through drupal_render_children()
+//	$output .= drupal_render_children($form);
+//	// return the output
+//	return $output;
+//}

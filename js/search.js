@@ -5,23 +5,23 @@
 jQuery(document).ready(function(){
     var counter = 0; var ids = "";
     (function worker() {
-        $.ajax({
+        jQuery.ajax({
             url: '?q=qscience_search/get_result',
             data: { 'query_id': Drupal.settings.query_id, 'ids': ids },
             type: 'POST',
             success: function(data) {
                 // debugger;
                 ids = data.ids;
-	        $("#qscience_d2dsearch_results").append(data.new_results);
+	        jQuery("#qscience_d2dsearch_results").append(data.new_results);
 	        counter += 5;
-	        $("#qscience_d2dsearch_progress")
+	        jQuery("#qscience_d2dsearch_progress")
                     .html("This search " + counter + "% done.");
             },
             error: function() {
                 // debugger;
                 //alert('failure');
 	        counter = 100;
-	        $("#qscience_d2dsearch_progress")
+	        jQuery("#qscience_d2dsearch_progress")
                     .html("This search " + counter + "% done.");
 	    },
             complete: function() {
