@@ -69,7 +69,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
     $record = array(
       'friend' => $my_name,
       'title' => $item->title,
-      'abstract' => $abstract,
+      'abstractField' => $abstract,
       'time' => $item->created,
     );
     $result_array[] = d2d_implode($record);

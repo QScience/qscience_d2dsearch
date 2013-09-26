@@ -278,7 +278,7 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
         $check = d2d_check_array($exploded_result, array(
           'friend' => 'is_string',
           'title' => 'is_string',
-          'abstract' => 'is_string',
+          'abstractField' => 'is_string',
           'time' => 'd2d_check_convert_int',
         ));
         if (!$check) {

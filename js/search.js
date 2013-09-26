@@ -3,17 +3,21 @@
  * Javascript support of the search interface.
  */
 jQuery(document).ready(function(){
+    var BASE_PATH;
     var forceStop, ids, INCREMENT;
     var resultDiv, progressDiv, table;
     var progressbar, console;
+    var abs1, ab2, ABS_MAX_LENGTH;
     var db;
 
+    // Creating database.
     db = new NDDB();
-
     db.on('insert', function(o) {
         addResult(o, db.length);
     });
 
+    BASE_PATH = Drupal.settings.basePath;
+    ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     forceStop = false;
     ids = "";
@@ -36,6 +40,34 @@ jQuery(document).ready(function(){
             progressLabel.text( "Search completed." );
         }
     });
+
+    function toggleAbsOld(eId, imgId) {
+        var e, img;
+        e = document.getElementById(eId);
+        img = document.getElementById(imgId);
+        if (e.style.display === 'block') {
+            e.style.display = 'none';
+            img.src = BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/plus.png';
+        }
+        else {
+            e.style.display = 'block';
+            img.src =  BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/minus.png';
+        }
+    }
+
+    function toggleAbs(img) {
+        var e, eId;
+        eId = 'abs_' + img.id.substr('toggler_'.length);
+        e = document.getElementById(eId);
+        if (e.style.display === 'block') {
+            e.style.display = 'none';
+            img.src = BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/plus.png';
+        }
+        else {
+            e.style.display = 'block';
+            img.src =  BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/minus.png';
+        }
+    }
     function progress() {
         var val = progressbar.progressbar( "value" ) || 0;
         progressbar.progressbar( "value", val + INCREMENT );
@@ -53,7 +85,8 @@ jQuery(document).ready(function(){
 
     function addResult(data, idx) {
         var div, friend, content, actions;
-        var title;
+        var title, abstractField;
+        var toggler;
 
         // Creating the div container.
         div = document.createElement('div');
@@ -65,7 +98,7 @@ jQuery(document).ready(function(){
 
         // Creating 3 nested divs;
         friend = document.createElement('div');
-        div.className = 'qscience_search_result_friend';
+        friend.className = 'qscience_search_result_friend';
 
         content = document.createElement('div');
         content.className = 'qscience_search_result_content';
@@ -76,13 +109,47 @@ jQuery(document).ready(function(){
         // Adding content to each div.
         friend.appendChild(document.createTextNode(data.friend));
 
-        title = document.createElement('h2');
-        title.className =  'qscience_search_result_title';
+        title = document.createElement('span');
+        title.className = 'qscience_search_result_title';
         title.appendChild(document.createTextNode(data.title));
 
-        content.appendChild(title);
-        content.appendChild(document.createTextNode(data.abstract));
+        abstractField = document.createElement('span');
+        abstractField.className = 'qscience_search_result_abstract';
 
+        // Display only first part of the abstract if it is too long.
+        if (data.abstractField.length > ABS_MAX_LENGTH) {
+            toggler = document.createElement('img');
+            toggler.id = 'toggler_' + idx;
+            //toggler.src = BASE_PATH + 'sites/all/qscience_d2dsearch/images/plus.png';
+            toggler.src = 'http://localhost/17/sites/all/modules/qscience_d2dsearch/images/plus.png';
+
+            abs1 = document.createElement('span');
+            abs1.appendChild(document.createTextNode(
+                data.abstractField.substr(0, ABS_MAX_LENGTH)));
+
+            abs2 = document.createElement('span');
+            abs2.style.display = 'none';
+            abs2.id = 'abs_' + idx;
+            abs2.appendChild(document.createTextNode(
+                data.abstractField.substr(ABS_MAX_LENGTH)));
+
+
+            toggler.onclick = function() {
+                toggleAbs(this);
+            };
+
+
+            abstractField.appendChild(abs1);
+            abstractField.appendChild(abs2);
+            abstractField.appendChild(toggler);
+
+        }
+        else {
+            abstractField.appendChild(document.createTextNode(data.abstractField));
+        }
+
+        content.appendChild(title);
+        content.appendChild(abstractField);
 
         actions.appendChild(document.createTextNode('ACTIONS!'));
 

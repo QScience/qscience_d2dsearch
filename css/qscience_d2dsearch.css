@@ -43,6 +43,48 @@ input#edit-search-string {
     width: 60%;
 }
 
+/* Result Div */
+
+div.qscience_search_result {
+    height: 200px;
+    margin-bottom: 15px;
+}
+
+
+div.qscience_search_result div {
+    border: 1px dotted #CCC;
+    width: 100%;
+    display: inline;
+    float: left;
+    padding: 5px;
+}
+
+div.qscience_search_result_friend {
+    width: 20%;
+    font-weight: bold;
+}
+
+div.qscience_search_result_content {
+    width: 50%;
+    font-weight: bold;
+}
+
+div.qscience_search_result_actions {
+    width: 25%;
+}
+
+span.qscience_search_result_title {
+    font-weight: bold;
+    font-size: 16px;
+    float: left;
+    clear: both;
+}
+
+span.qscience_search_result_abstract {
+    float: left;
+    clear: both;
+    font-weight: normal;
+}
 
 /* Console */
 
@@ -73,9 +115,8 @@ div#console span.error {
 }
 
 div#console span.silly {
-    //display: none;
+    display: none;
 }
-
 
 
 /* Search Progress Bar */
@@ -91,5 +132,3 @@ div#console span.silly {
     font-weight: bold;
     text-shadow: 1px 1px 0 #fff;
 }
-
-/*
