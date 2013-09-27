@@ -48,11 +48,11 @@ input#edit-search-string {
 div.qscience_search_result {
     height: 200px;
     margin-bottom: 15px;
+    -webkit-gradient(linear, 0% 0%, 0% 100%, from(#00000), to(#FFFFFF));
 }
 
 
 div.qscience_search_result div {
-    border: 1px dotted #CCC;
     width: 100%;
     display: inline;
     float: left;
@@ -62,6 +62,8 @@ div.qscience_search_result div {
 div.qscience_search_result_friend {
     width: 20%;
     font-weight: bold;
+    border-bottom: 1px dotted #CCC;
+    color: #4186D3;
 }
 
 div.qscience_search_result_content {

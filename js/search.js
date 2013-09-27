@@ -3,7 +3,7 @@
  * Javascript support of the search interface.
  */
 jQuery(document).ready(function(){
-    var BASE_PATH;
+    var BASE_PATH, MODULE_PATH;
     var forceStop, ids, INCREMENT;
     var resultDiv, progressDiv, table;
     var progressbar, console;
@@ -17,6 +17,7 @@ jQuery(document).ready(function(){
     });
 
     BASE_PATH = Drupal.settings.basePath;
+    MODULE_PATH = BASE_PATH + Drupal.settings.installFolder + '/';
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     forceStop = false;
@@ -47,11 +48,11 @@ jQuery(document).ready(function(){
         img = document.getElementById(imgId);
         if (e.style.display === 'block') {
             e.style.display = 'none';
-            img.src = BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/plus.png';
+            img.src = MODULE_PATH + 'images/plus.png';
         }
         else {
             e.style.display = 'block';
-            img.src =  BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/minus.png';
+            img.src =  MODULE_PATH + 'images/minus.png';
         }
     }
 
@@ -61,11 +62,11 @@ jQuery(document).ready(function(){
         e = document.getElementById(eId);
         if (e.style.display === 'block') {
             e.style.display = 'none';
-            img.src = BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/plus.png';
+            img.src = MODULE_PATH + 'images/plus.png';
         }
         else {
             e.style.display = 'block';
-            img.src =  BASE_PATH + 'sites/all/modules/qscience_d2dsearch/images/minus.png';
+            img.src =  MODULE_PATH + 'images/minus.png';
         }
     }
     function progress() {
@@ -85,6 +86,7 @@ jQuery(document).ready(function(){
 
     function addResult(data, idx) {
         var div, friend, content, actions;
+        var friendLink;
         var title, abstractField;
         var toggler;
 
@@ -107,7 +109,11 @@ jQuery(document).ready(function(){
         actions.className = 'qscience_search_result_actions';
 
         // Adding content to each div.
-        friend.appendChild(document.createTextNode(data.friend));
+        friendLink = document.createElement('a');
+        a.href = data.friend_url;
+        a.target = '_blank';
+        friendLink.appendChild(document.createTextNode(data.friend));
+        friend.appenChild(friendLink);
 
         title = document.createElement('span');
         title.className = 'qscience_search_result_title';
@@ -121,7 +127,7 @@ jQuery(document).ready(function(){
             toggler = document.createElement('img');
             toggler.id = 'toggler_' + idx;
             //toggler.src = BASE_PATH + 'sites/all/qscience_d2dsearch/images/plus.png';
-            toggler.src = 'http://localhost/17/sites/all/modules/qscience_d2dsearch/images/plus.png';
+            toggler.src = MODULE_PATH + 'images/plus.png';
 
             abs1 = document.createElement('span');
             abs1.appendChild(document.createTextNode(
@@ -180,7 +186,7 @@ jQuery(document).ready(function(){
                     log('silly', 'no new data');
                     return;
                 }
-
+                log(data.new_results);
                 log('info', 'new data received');
 
                 ids = data.ids;

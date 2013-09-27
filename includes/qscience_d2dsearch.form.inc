@@ -181,11 +181,15 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     drupal_set_message(t('Failed performing search.'));
   }
   else {
-    $form_state['rebuild'] = TRUE;
 
+    $form_state['rebuild'] = TRUE;
+    $installFolder = drupal_get_path('module','qscience_d2dsearch').'/';
     $path = drupal_get_path('module', 'qscience_d2dsearch');
     drupal_add_library('system', 'ui.progressbar');
-    drupal_add_js(array('query_id' => $query_id), 'setting');
+    drupal_add_js(array(
+      'query_id' => $query_id,
+      'installFolder' => $installFolder,
+    ),'setting');
     drupal_add_js($path . '/js/nddb-full.js');
     drupal_add_js($path . '/js/sprintf.js');
     drupal_add_js($path . '/js/search.js');
@@ -277,6 +281,7 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
       if ($exploded_result !== FALSE) {
         $check = d2d_check_array($exploded_result, array(
           'friend' => 'is_string',
+          'friend_url' => 'is_string',
           'title' => 'is_string',
           'abstractField' => 'is_string',
           'time' => 'd2d_check_convert_int',
@@ -286,15 +291,6 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
           continue;
         }
         $out[] = $exploded_result;
-//        $output .= '<div style="border:1px dashed #f00; margin:5px; padding:5px">';
-//        $output .= '<b>' . check_plain($exploded_result['name']) . '</b>';
-//        $output .= ' ';
-//        $output .= date('F j, Y', $exploded_result['time']);
-//        $output .= '<br/>';
-//        $output .= check_plain($exploded_result['title']);
-//        $output .= '<br/>';
-//        $output .= check_plain($exploded_result['abstract']);
-//        $output .= '</div>';
       }
     }
   }

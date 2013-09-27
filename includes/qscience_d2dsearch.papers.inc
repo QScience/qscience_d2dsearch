@@ -61,6 +61,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   }
   $my_instance = d2d_api_own_instance_get();
   $my_name = $my_instance['name'];
+  $my_url = $my_instance['url'];
   $result_array = array();
 
   // TODO: load other fields, like author reference.
@@ -68,6 +69,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
     $abstract = empty($item->abstract) ? 'no abstract' : $item->abstract['und'][0]['value'];
     $record = array(
       'friend' => $my_name,
+      'friend_url' =>> $my_url,
       'title' => $item->title,
       'abstractField' => $abstract,
       'time' => $item->created,
