@@ -4,10 +4,15 @@
  */
 jQuery(document).ready(function(){
     var BASE_PATH, MODULE_PATH;
-    var forceStop, ids, INCREMENT;
+    var ids, INCREMENT;
     var resultDiv, progressDiv, table;
-    var progressbar, console;
+    var progressbar, console, header;
     var abs1, ab2, ABS_MAX_LENGTH;
+
+    var displayed, duplicates, found;
+
+    var countDuplicates, countDisplayed;
+
     var MIN_LEV_DIST;
     //var db;
 
@@ -18,12 +23,9 @@ jQuery(document).ready(function(){
     db.on('insert', function(o) {
         o.idx = db.length;
         o.similar = [];
-        log('info', o.idx);
         addResult(o, db.length);
     });
     db.on('update', function(o, update) {
-        log('info', o.idx);
-        //debugger;
         var friendCountSpan;
         if ('undefined' === typeof update.similar) return;
         // Update.similar must be an array containing all previous similar items.
@@ -36,27 +38,39 @@ jQuery(document).ready(function(){
             friendCountSpan.innerHTML = '(+' + o.similar.length + ')';
         }
         else {
-            debugger
-            //log('error', o.idx + ' - ' + idx);
+            log('error', 'could not find similar result with id: ' + o.idx);
         }
     });
     db.index('idx', function(o) {
         return o.idx;
     });
 
+    // Init constants.
     BASE_PATH = Drupal.settings.basePath;
     MODULE_PATH = BASE_PATH + Drupal.settings.installFolder + '/';
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     MIN_LEV_DIST = 5;
-    forceStop = false;
-    ids = "";
 
+    // Init other variables.
+
+    // The list of ids (to be sent on every request).
+    ids = "";
+    // The number of duplicates results, according to the similarity distance.
+    countDuplicates = 0;
+
+    // Fetching existing divs and other elements.
+    header = document.getElementById('qscience_d2dsearch_results_header');
     resultDiv = document.getElementById('qscience_d2dsearch_results');
+
+    found = document.getElementById('qsr_found');
+    displayed = document.getElementById('qsr_displayed');
+    duplicates = document.getElementById('qsr_duplicates');
 
     myConsole = document.getElementById('console');
     myConsole.style.display = '';
 
+    // Creating the Progress Bar.
     progressbar = jQuery( "#progressbar" );
     progressbar.toggle();
 
@@ -70,6 +84,18 @@ jQuery(document).ready(function(){
             progressLabel.text( "Search completed." );
         }
     });
+
+    function updateHeader(obj) {
+        if ('undefined' !== typeof obj.found) {
+            found.innerHTML = 'Found: ' + obj.found;
+        }
+        if ('undefined' !== typeof obj.duplicates) {
+            duplicates.innerHTML = 'Duplicates: ' + obj.duplicates;
+        }
+        if ('undefined' !== typeof obj.displayed) {
+            displayed.innerHTML = 'Displayed: ' + obj.displayed;
+        }
+    }
 
     function isSamePub(idx, title) {
         var i, len, item;
@@ -113,7 +139,6 @@ jQuery(document).ready(function(){
     }
 
     function addResult(data, idx) {
-        log('info', data.idx);
         var div, friend, content, actions, similar;
         var friendLink, moreFriends;
         var title, abstractField;
@@ -213,15 +238,20 @@ jQuery(document).ready(function(){
         if (idxExisting === -1) {
             // Appending the new result into the result div.
             resultDiv.appendChild(div);
-            //log('info', 'new result added.');
+            log('info', 'new result added.');
+            updateHeader({
+                found: db.db.length,
+                displayed: db.db.length
+            });
         }
         else {
-            (function(idxExisting, idx) {
-                //setTimeout(function() {
-                    db.idx.update(idxExisting, {similar: idx});
-                //}, 1000);
-                //log('info', 'similar result found.');
-            })(idxExisting, idx);
+            db.idx.update(idxExisting, {similar: idx});
+            log('info', 'similar result found.');
+            updateHeader({
+                found: db.db.length,
+                duplicates: ++countDuplicates,
+                displayed: db.db.length
+            });
         }
     }
 

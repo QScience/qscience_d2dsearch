@@ -46,8 +46,9 @@ input#edit-search-string {
 /* Result Div */
 
 div.qscience_search_result {
-    height: 200px;
-    margin-bottom: 15px;
+    height: 100px;
+    margin-bottom: 5px;
+    border: 1px dotted #CCC;
     -webkit-gradient(linear, 0% 0%, 0% 100%, from(#00000), to(#FFFFFF));
 }
 
@@ -63,11 +64,8 @@ div.qscience_search_result_friend {
     font-weight: bold;
     border-bottom: 1px dotted #CCC;
     color: #4186D3;
-}
-
-div.qscience_search_result_content {
-    width: 50%;
-    font-weight: bold;
+    height: 40px;
+    background: #689AD3;
 }
 
 div.qscience_search_result_actions {
@@ -76,9 +74,14 @@ div.qscience_search_result_actions {
     text-align: right;
 }
 
+div.qscience_search_result_content {
+
+}
+
+
 span.qscience_search_result_title {
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
     float: left;
     clear: both;
 }
@@ -140,3 +143,15 @@ div#console span.silly {
     font-weight: bold;
     text-shadow: 1px 1px 0 #fff;
 }
+
+/* Header */
+
+div#qscience_d2dsearch_results_header {
+    font-weight: bold;
+    padding: 3px;
+}
+
+div#qscience_d2dsearch_results_header span {
+    margin: 5px;
+}
+
