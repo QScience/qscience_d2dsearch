@@ -189,7 +189,8 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     drupal_add_js(array(
       'query_id' => $query_id,
       'installFolder' => $installFolder,
-    ),'setting');
+    ), 'setting');
+    drupal_add_js($path . '/js/levenshtein.js');
     drupal_add_js($path . '/js/nddb-full.js');
     drupal_add_js($path . '/js/sprintf.js');
     drupal_add_js($path . '/js/search.js');

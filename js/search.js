@@ -8,18 +8,47 @@ jQuery(document).ready(function(){
     var resultDiv, progressDiv, table;
     var progressbar, console;
     var abs1, ab2, ABS_MAX_LENGTH;
-    var db;
+    var MIN_LEV_DIST;
+    //var db;
 
     // Creating database.
-    db = new NDDB();
+    db = new NDDB({
+        update: { indexes: true }
+    });
     db.on('insert', function(o) {
+        o.idx = db.length;
+        o.similar = [];
+        log('info', o.idx);
         addResult(o, db.length);
+    });
+    db.on('update', function(o, update) {
+        log('info', o.idx);
+        //debugger;
+        var friendCountSpan;
+        if ('undefined' === typeof update.similar) return;
+        // Update.similar must be an array containing all previous similar items.
+        o.similar.push(update.similar);
+        update.similar = o.similar;
+
+        // The updated object o contains the id of the div to update.
+        friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
+        if (friendCountSpan) {
+            friendCountSpan.innerHTML = '(+' + o.similar.length + ')';
+        }
+        else {
+            debugger
+            //log('error', o.idx + ' - ' + idx);
+        }
+    });
+    db.index('idx', function(o) {
+        return o.idx;
     });
 
     BASE_PATH = Drupal.settings.basePath;
     MODULE_PATH = BASE_PATH + Drupal.settings.installFolder + '/';
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
+    MIN_LEV_DIST = 5;
     forceStop = false;
     ids = "";
 
@@ -42,18 +71,17 @@ jQuery(document).ready(function(){
         }
     });
 
-    function toggleAbsOld(eId, imgId) {
-        var e, img;
-        e = document.getElementById(eId);
-        img = document.getElementById(imgId);
-        if (e.style.display === 'block') {
-            e.style.display = 'none';
-            img.src = MODULE_PATH + 'images/plus.png';
+    function isSamePub(idx, title) {
+        var i, len, item;
+        i = 0, len = db.db.length;
+        for ( ; i < len ; i++ ) {
+            item = db.db[i];
+            if (item.idx === idx) continue;
+            if (levenshtein(title, item.title) < MIN_LEV_DIST) {
+                return item.idx;
+            }
         }
-        else {
-            e.style.display = 'block';
-            img.src =  MODULE_PATH + 'images/minus.png';
-        }
+        return -1;
     }
 
     function toggleAbs(img) {
@@ -85,10 +113,12 @@ jQuery(document).ready(function(){
     }
 
     function addResult(data, idx) {
-        var div, friend, content, actions;
-        var friendLink;
+        log('info', data.idx);
+        var div, friend, content, actions, similar;
+        var friendLink, moreFriends;
         var title, abstractField;
         var toggler;
+        var idxExisting, sameDiv, sameFriend, sameFriendSpan;
 
         // Creating the div container.
         div = document.createElement('div');
@@ -98,9 +128,11 @@ jQuery(document).ready(function(){
 
         div.className = 'qscience_search_result';
 
-        // Creating 3 nested divs;
+        // Creating all divs;
+
         friend = document.createElement('div');
         friend.className = 'qscience_search_result_friend';
+        friend.id = 'qsr_friend_' + idx;
 
         content = document.createElement('div');
         content.className = 'qscience_search_result_content';
@@ -108,13 +140,30 @@ jQuery(document).ready(function(){
         actions = document.createElement('div');
         actions.className = 'qscience_search_result_actions';
 
+        similar = document.createElement('div');
+        similar.className = 'qscience_search_result_similar';
+
+
         // Adding content to each div.
+
+        // Friend.
         friendLink = document.createElement('a');
         friendLink.href = data.friend_url;
         friendLink.target = '_blank';
         friendLink.appendChild(document.createTextNode(data.friend));
         friend.appendChild(friendLink);
 
+        // Span for similar results count.
+        sameFriendSpan = document.createElement('span');
+        sameFriendSpan.id = 'qsr_friend_more_' + idx;
+        sameFriendSpan.className = 'qsr_friend_more';
+        friend.appendChild(sameFriendSpan);
+
+        // Actions inside
+        actions.appendChild(document.createTextNode('ACTIONS!'));
+        friend.appendChild(actions);
+
+        // Content.
         title = document.createElement('span');
         title.className = 'qscience_search_result_title';
         title.appendChild(document.createTextNode(data.title));
@@ -126,7 +175,6 @@ jQuery(document).ready(function(){
         if (data.abstractField.length > ABS_MAX_LENGTH) {
             toggler = document.createElement('img');
             toggler.id = 'toggler_' + idx;
-            //toggler.src = BASE_PATH + 'sites/all/qscience_d2dsearch/images/plus.png';
             toggler.src = MODULE_PATH + 'images/plus.png';
 
             abs1 = document.createElement('span');
@@ -144,11 +192,9 @@ jQuery(document).ready(function(){
                 toggleAbs(this);
             };
 
-
             abstractField.appendChild(abs1);
             abstractField.appendChild(abs2);
             abstractField.appendChild(toggler);
-
         }
         else {
             abstractField.appendChild(document.createTextNode(data.abstractField));
@@ -157,14 +203,26 @@ jQuery(document).ready(function(){
         content.appendChild(title);
         content.appendChild(abstractField);
 
-        actions.appendChild(document.createTextNode('ACTIONS!'));
 
         div.appendChild(friend);
         div.appendChild(content);
-        div.appendChild(actions);
 
-        // Appending the new result into the result div.
-        resultDiv.appendChild(div);
+
+        // Is this already existing ?
+        idxExisting = isSamePub(idx, data.title);
+        if (idxExisting === -1) {
+            // Appending the new result into the result div.
+            resultDiv.appendChild(div);
+            //log('info', 'new result added.');
+        }
+        else {
+            (function(idxExisting, idx) {
+                //setTimeout(function() {
+                    db.idx.update(idxExisting, {similar: idx});
+                //}, 1000);
+                //log('info', 'similar result found.');
+            })(idxExisting, idx);
+        }
     }
 
     (function worker() {

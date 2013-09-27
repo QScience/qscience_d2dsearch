@@ -60,9 +60,10 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
     return FALSE;
   }
   $my_instance = d2d_api_own_instance_get();
-  $my_name = $my_instance['name'];
   $my_url = substr($my_instance['url'], 0,
                    strpos($my_instance['url'], 'xmlrpc.php'));
+
+  $my_name = empty($my_instance['name']) ? $my_url : $my_instance['name'];
 
   $result_array = array();
   // TODO: load other fields, like author reference.

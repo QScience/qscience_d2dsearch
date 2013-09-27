@@ -51,7 +51,6 @@ div.qscience_search_result {
     -webkit-gradient(linear, 0% 0%, 0% 100%, from(#00000), to(#FFFFFF));
 }
 
-
 div.qscience_search_result div {
     width: 100%;
     display: inline;
@@ -73,6 +72,8 @@ div.qscience_search_result_content {
 
 div.qscience_search_result_actions {
     width: 25%;
+    float: right;
+    text-align: right;
 }
 
 span.qscience_search_result_title {
@@ -86,6 +87,11 @@ span.qscience_search_result_abstract {
     float: left;
     clear: both;
     font-weight: normal;
+}
+
+span.qsr_friend_more {
+    margin-left: 10px;
+    background: #CFF;
 }
 
 /* Console */
