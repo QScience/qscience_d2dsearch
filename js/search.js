@@ -110,10 +110,10 @@ jQuery(document).ready(function(){
 
         // Adding content to each div.
         friendLink = document.createElement('a');
-        a.href = data.friend_url;
-        a.target = '_blank';
+        friendLink.href = data.friend_url;
+        friendLink.target = '_blank';
         friendLink.appendChild(document.createTextNode(data.friend));
-        friend.appenChild(friendLink);
+        friend.appendChild(friendLink);
 
         title = document.createElement('span');
         title.className = 'qscience_search_result_title';
@@ -186,7 +186,7 @@ jQuery(document).ready(function(){
                     log('silly', 'no new data');
                     return;
                 }
-                log(data.new_results);
+                //log(data.new_results);
                 log('info', 'new data received');
 
                 ids = data.ids;

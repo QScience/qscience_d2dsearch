@@ -61,12 +61,14 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   }
   $my_instance = d2d_api_own_instance_get();
   $my_name = $my_instance['name'];
-  $my_url = $my_instance['url'];
-  $result_array = array();
+  $my_url = substr($my_instance['url'], 0,
+                   strpos($my_instance['url'], 'xmlrpc.php'));
 
+  $result_array = array();
   // TODO: load other fields, like author reference.
   foreach($items as $item) {
-    $abstract = empty($item->abstract) ? 'no abstract' : $item->abstract['und'][0]['value'];
+    $abstract = empty($item->abstract) ?
+        'no abstract' : $item->abstract['und'][0]['value'];
     $record = array(
       'friend' => $my_name,
       'friend_url' => $my_url,
