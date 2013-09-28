@@ -89,6 +89,7 @@ jQuery(document).ready(function(){
     myConsole.style.display = '';
 
     hideconsole = document.getElementById('hideconsole');
+    hideconsole.style.display = '';
 
     hideconsole.onclick = function() {
         if (myConsole.style.height === '0px') {

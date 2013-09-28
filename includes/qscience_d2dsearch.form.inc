@@ -15,7 +15,7 @@ function qscience_d2dsearch_main() {
   drupal_add_css(drupal_get_path('module', 'qscience_d2dsearch') . '/css/qscience_d2dsearch.css');
 
   $build['main'] = array(
-    '#title' => t('Search for papers, and other relevant content in your friends network.'),
+    '#title' => t('Search for papers in your friends network.'),
     '#type' => 'fieldset',
   );
 
@@ -36,7 +36,7 @@ function qscience_d2dsearch_main() {
   $build['main'][] = drupal_get_form('qscience_d2dsearch_form_search');
 
   $build['results'] = array(
-    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Searching...</div></div><div id="console" style="display: none"></div><span id="hideconsole"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found"></span><span id="qsr_duplicates"></span><span id="qsr_displayed"></span></div><div id="qscience_d2dsearch_results"></div>',
+    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Searching...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found"></span><span id="qsr_duplicates"></span><span id="qsr_displayed"></span></div><div id="qscience_d2dsearch_results"></div>',
   );
 
   return $build;
@@ -60,6 +60,22 @@ function qscience_d2dsearch_form_search() {
     '#required' => TRUE,
   );
 
+  $form['search_container']['search_type'] = array(
+    '#type' => 'select',
+    //'#title' => t('Search type.'),
+    '#options' => array(
+      'single_friend' => t('Local only'),
+      //'single_friend' => t('Single Friend'),
+      'all_friends' => t('All Friends'),
+      'friends_of_friends' => t('Friends of Friends'),
+      'flood' => t('Flood Search'),
+    ),
+    '#default_value' => 'flood',
+    '#required' => TRUE,
+  );
+
+
+  /*
   $form['search_container']['content_type'] = array(
     '#type' => 'select',
     //'#title' => t('Content type.'),
@@ -70,6 +86,7 @@ function qscience_d2dsearch_form_search() {
     '#default_value' => 'papers',
     '#required' => TRUE,
   );
+  */
 
   $form['search_container']['submit'] = array(
     '#type' => 'submit',
@@ -83,25 +100,14 @@ function qscience_d2dsearch_form_search() {
     '#collapsed' => TRUE,
   );
 
+  /*
   $form['advanced']['local_search'] = array(
     '#type' => 'checkbox',
     '#title' => t('Include local results'),
     //'#description' => t('Include local results'),
     '#default_value' => 0,
   );
-
-  $form['advanced']['search_type'] = array(
-    '#type' => 'select',
-    '#title' => t('Search type.'),
-    '#options' => array(
-      'single_friend' => t('Single Friend'),
-      'all_friends' => t('All Friends'),
-      'friends_of_friends' => t('Friends of Friends'),
-      'flood' => t('Flood Search'),
-    ),
-    '#default_value' => 'flood',
-    '#required' => TRUE,
-  );
+  */
 
   $form['advanced']['date_container'] = array(
     '#type' => 'container',
@@ -136,10 +142,10 @@ function qscience_d2dsearch_form_search() {
 function qscience_d2dsearch_form_search_validate($form, &$form_state) {
 
   // TODO put only in network search mode ?
-  if (isset($form_state['values']['search_string']) &&
-    strlen($form_state['values']['search_string']) < 3) {
-    form_set_error('search_string', t('Please type at least 3 charachters as search string.'));
-  }
+//  if (isset($form_state['values']['search_string']) &&
+//    strlen($form_state['values']['search_string']) < 3) {
+//    form_set_error('search_string', t('Please type at least 3 charachters as search string.'));
+//  }
 
   $fromArray = $form_state['values']['date_from'];
   $fromTS = mktime(0, 0, 0,
@@ -169,7 +175,8 @@ function qscience_d2dsearch_form_search_validate($form, &$form_state) {
 function qscience_d2dsearch_form_search_submit($form, &$form_state) {
   $query_array = array(
     'search_string' => $form_state['values']['search_string'],
-    'content_type' => $form_state['values']['content_type'],
+    //'content_type' => $form_state['values']['content_type'],
+    'content_type' => 'papers',
     'search_type' => $form_state['values']['search_type'],
     'date_from' => $form_state['values']['date_from'],
     'date_to' => $form_state['values']['date_to'],
@@ -183,7 +190,10 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
 
   $query_id = d2dsearch_query_start('qscience_d2dsearch_papers',
               $imploded_query,
-              $form_state['values']['local_search']
+              NULL,
+              NULL,
+              TRUE
+              //$form_state['values']['local_search']
   );
 
   if (!_d2dsearch_check_query_id($query_id)) {
