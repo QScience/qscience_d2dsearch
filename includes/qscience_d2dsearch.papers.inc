@@ -11,7 +11,6 @@
  */
 function _qscience_d2dsearch_papers_get($imploded_query) {
 
-
   $exploded_query = d2d_explode($imploded_query);
   if ($exploded_query === FALSE) {
     return FALSE;
@@ -68,6 +67,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   $result_array = array();
   // TODO: load other fields, like author reference.
   foreach($items as $item) {
+    $a = node_view($item);
     $abstract = empty($item->abstract) ?
         'no abstract' : $item->abstract['und'][0]['value'];
     $record = array(

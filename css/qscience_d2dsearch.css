@@ -46,25 +46,38 @@ input#edit-search-string {
 /* Result Div */
 
 div.qscience_search_result {
-    height: 100px;
-    margin-bottom: 5px;
+    clear: both;
+    min-height: 100px;
+    padding: 20px;
+    margin: 10px;
     border: 1px dotted #CCC;
-    -webkit-gradient(linear, 0% 0%, 0% 100%, from(#00000), to(#FFFFFF));
+    background: white;
 }
 
-div.qscience_search_resultasa div {
+div.my_result {
+    background: #FAF6E6;
+    display: block;
+    clear: both;
+}
+
+
+div.qscience_search_result div {
+    clear: both;
+    /*
     width: 100%;
     display: inline;
     float: left;
     padding: 5px;
+    */
 }
 
 div.qscience_search_result_friend {
+    clear: both;
     font-weight: bold;
     border-bottom: 1px dotted #CCC;
     color: #4186D3;
     padding: 1px 3px 1px 3px;
-    background: #689AD3;
+    /*background: #689AD3; */
 }
 
 div.qscience_search_result_actions {
@@ -94,6 +107,24 @@ span.qscience_search_result_abstract {
 span.qsr_friend_more {
     margin-left: 10px;
     background: #CFF;
+    cursor: pointer;
+}
+
+/* Similar results */
+
+span.duplicatedText {
+    font-size: 14px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #CCC;
+}
+
+div.qscience_search_result_similar {
+    clear: both;
+    font-size: 10px;
+}
+div.qscience_search_result_similar span.qscience_search_result_title {
+    font-size: 12px;
 }
 
 /* Console */
@@ -131,7 +162,7 @@ span#hideconsole {
 }
 
 
-    
+
 div#console span.info {
 
 }

@@ -134,6 +134,13 @@ function qscience_d2dsearch_form_search() {
  * Form validation handler for qscience_d2dsearch_form_search().
  */
 function qscience_d2dsearch_form_search_validate($form, &$form_state) {
+
+  // TODO put only in network search mode ?
+  if (isset($form_state['values']['search_string']) &&
+    strlen($form_state['values']['search_string']) < 3) {
+    form_set_error('search_string', t('Please type at least 3 charachters as search string.'));
+  }
+
   $fromArray = $form_state['values']['date_from'];
   $fromTS = mktime(0, 0, 0,
             intval($fromArray['month']),
@@ -187,10 +194,14 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     $form_state['rebuild'] = TRUE;
     $installFolder = drupal_get_path('module','qscience_d2dsearch').'/';
     $path = drupal_get_path('module', 'qscience_d2dsearch');
+    $my_instance = d2d_api_own_instance_get();
+    $my_url = substr($my_instance['url'], 0,
+                     strpos($my_instance['url'], 'xmlrpc.php'));
     drupal_add_library('system', 'ui.progressbar');
     drupal_add_js(array(
       'query_id' => $query_id,
       'installFolder' => $installFolder,
+      'my_instance' => $my_url,
     ), 'setting');
     drupal_add_js($path . '/js/levenshtein.js');
     drupal_add_js($path . '/js/nddb-full.js');

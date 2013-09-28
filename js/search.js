@@ -7,16 +7,13 @@ jQuery(document).ready(function(){
     var ids, INCREMENT;
     var resultDiv, progressDiv, table;
     var progressbar, console, header;
+    var MY_INSTANCE;
     var abs1, ab2, ABS_MAX_LENGTH;
-
     var hideconsole;
-
     var displayed, duplicates, found;
-
     var countDuplicates, countDisplayed;
-
     var MIN_LEV_DIST;
-    //var db;
+    var db;
 
     // Creating database.
     db = new NDDB({
@@ -28,16 +25,34 @@ jQuery(document).ready(function(){
         addResult(o, db.length);
     });
     db.on('update', function(o, update) {
-        var friendCountSpan;
+        var friendCountSpan, parentDiv, childDiv;
         if ('undefined' === typeof update.similar) return;
         // Update.similar must be an array containing all previous similar items.
         o.similar.push(update.similar);
         update.similar = o.similar;
+        childDiv = update.div;
+        delete update.div;
+
+
 
         // The updated object o contains the id of the div to update.
         friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
         if (friendCountSpan) {
             friendCountSpan.innerHTML = '(+' + o.similar.length + ')';
+
+
+            parentDiv = document.getElementById('qsr_similar_' + o.idx);
+            parentDiv.appendChild(childDiv);
+
+            friendCountSpan.onclick = function() {
+                if (parentDiv.style.display === '') {
+                    parentDiv.style.display = 'none';
+                }
+                else {
+                    parentDiv.style.display = '';
+                }
+            }
+
         }
         else {
             log('error', 'could not find similar result with id: ' + o.idx);
@@ -50,6 +65,7 @@ jQuery(document).ready(function(){
     // Init constants.
     BASE_PATH = Drupal.settings.basePath;
     MODULE_PATH = BASE_PATH + Drupal.settings.installFolder + '/';
+    MY_INSTANCE = Drupal.settings.my_instance;
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     MIN_LEV_DIST = 5;
@@ -57,7 +73,7 @@ jQuery(document).ready(function(){
     // Init other variables.
 
     // The list of ids (to be sent on every request).
-    ids = "";
+    ids = '';
     // The number of duplicates results, according to the similarity distance.
     countDuplicates = 0;
 
@@ -73,7 +89,7 @@ jQuery(document).ready(function(){
     myConsole.style.display = '';
 
     hideconsole = document.getElementById('hideconsole');
-    
+
     hideconsole.onclick = function() {
         if (myConsole.style.height === '0px') {
             myConsole.style.height = '50px';
@@ -155,7 +171,7 @@ jQuery(document).ready(function(){
 
     function addResult(data, idx) {
         var div, friend, content, actions, similar;
-        var friendLink, moreFriends;
+        var friendLink, moreFriends, duplicatedTextSpan;
         var title, abstractField;
         var toggler;
         var idxExisting, sameDiv, sameFriend, sameFriendSpan;
@@ -182,16 +198,23 @@ jQuery(document).ready(function(){
 
         similar = document.createElement('div');
         similar.className = 'qscience_search_result_similar';
-
+        similar.id = 'qsr_similar_' + idx;
+        similar.style.display = 'none';
 
         // Adding content to each div.
 
         // Friend.
-        friendLink = document.createElement('a');
-        friendLink.href = data.friend_url;
-        friendLink.target = '_blank';
-        friendLink.appendChild(document.createTextNode(data.friend));
-        friend.appendChild(friendLink);
+        if (data.friend_url === MY_INSTANCE) {
+            div.className = div.className + ' ' + 'my_result';
+            friend.appendChild(document.createTextNode('Local result'));
+        }
+        else {
+            friendLink = document.createElement('a');
+            friendLink.href = data.friend_url;
+            friendLink.target = '_blank';
+            friendLink.appendChild(document.createTextNode(data.friend));
+            friend.appendChild(friendLink);
+        }
 
         // Span for similar results count.
         sameFriendSpan = document.createElement('span');
@@ -239,15 +262,20 @@ jQuery(document).ready(function(){
         content.appendChild(title);
         content.appendChild(abstractField);
 
-        
+
+        // Similar.
+        duplicatedTextSpan = document.createElement('span');
+        duplicatedTextSpan.className = 'duplicatedText';
+        duplicatedTextSpan.appendChild(document.createTextNode('Duplicated results:'));
+        similar.appendChild(duplicatedTextSpan);
+
         // Actions.
         actions.appendChild(document.createTextNode('ACTIONS!'));
-
 
         div.appendChild(friend);
         div.appendChild(content);
         div.appendChild(actions);
-
+        div.appendChild(similar);
 
         // Is this already existing ?
         idxExisting = isSamePub(idx, data.title);
@@ -261,7 +289,10 @@ jQuery(document).ready(function(){
             });
         }
         else {
-            db.idx.update(idxExisting, {similar: idx});
+            db.idx.update(idxExisting, {
+                similar: idx,
+                div: div
+            });
             log('info', 'similar result found.');
             updateHeader({
                 found: db.db.length,
@@ -271,6 +302,9 @@ jQuery(document).ready(function(){
         }
     }
 
+// jQuery worker for AJAX requests.
+
+    log('info', 'search started...');
     (function worker() {
         jQuery.ajax({
             url: '?q=qscience_search/get_result',
@@ -312,6 +346,12 @@ jQuery(document).ready(function(){
 	        if (progressbar.progressbar( "value" ) < 100) {
       	            setTimeout(worker, 500);
 	        }
+                else {
+                    log('info', 'search completed.');
+                    if (ids === '') {
+                        found.innerHTML = 'No results found.';
+                    }
+                }
             }
         });
     })()
