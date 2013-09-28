@@ -9,6 +9,8 @@ jQuery(document).ready(function(){
     var progressbar, console, header;
     var abs1, ab2, ABS_MAX_LENGTH;
 
+    var hideconsole;
+
     var displayed, duplicates, found;
 
     var countDuplicates, countDisplayed;
@@ -69,6 +71,19 @@ jQuery(document).ready(function(){
 
     myConsole = document.getElementById('console');
     myConsole.style.display = '';
+
+    hideconsole = document.getElementById('hideconsole');
+    
+    hideconsole.onclick = function() {
+        if (myConsole.style.height === '0px') {
+            myConsole.style.height = '50px';
+            hideconsole.innerHTML = ' >> hide console';
+        }
+        else {
+            myConsole.style.height = '0px';
+            hideconsole.innerHTML = ' >> show console';
+        }
+    };
 
     // Creating the Progress Bar.
     progressbar = jQuery( "#progressbar" );
@@ -184,10 +199,6 @@ jQuery(document).ready(function(){
         sameFriendSpan.className = 'qsr_friend_more';
         friend.appendChild(sameFriendSpan);
 
-        // Actions inside
-        actions.appendChild(document.createTextNode('ACTIONS!'));
-        friend.appendChild(actions);
-
         // Content.
         title = document.createElement('span');
         title.className = 'qscience_search_result_title';
@@ -228,9 +239,14 @@ jQuery(document).ready(function(){
         content.appendChild(title);
         content.appendChild(abstractField);
 
+        
+        // Actions.
+        actions.appendChild(document.createTextNode('ACTIONS!'));
+
 
         div.appendChild(friend);
         div.appendChild(content);
+        div.appendChild(actions);
 
 
         // Is this already existing ?
