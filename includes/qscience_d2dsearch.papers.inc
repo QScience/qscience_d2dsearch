@@ -82,7 +82,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
       foreach($authorObjs as $author) {
         // TODO: Should take first and last separate ??
         // $first_name = $author->first_name['und'][0]['value'];
-        // $last_name = $author->last_name['und'][0]['value'];
+        // $last_name = $author->last_name['und'103][0]['value'];
         // $authors[] = array(
         //  'first_name' => $first_name,
         //  'last_name' => $last_name,
@@ -100,8 +100,8 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
     if (!empty($item->journal_reference)) {
       // TODO support multilanguage.
       $journalNid = $item->journal_reference['und'][0]['target_id'];
-      $journalObj = entity_load('node', $journalNid);
-      $journal = $journalObj['und'][0]['value'];
+      $journalObj = node_load($journalNid);
+      $journal = $journalObj->title;
     }
 
     // Loading. abstract.
