@@ -50,7 +50,7 @@ div.qscience_search_result {
     min-height: 100px;
     padding: 5px 20px;
     margin: 10px;
-    border: 1px dotted #CCC;
+    /* border: 1px dotted #CCC; */
     background: white;
 }
 
@@ -90,10 +90,20 @@ div.qscience_search_result_content {
     padding: 5px;
 }
 
-span.qsr_authors {
-    color: #311C10;
+span.qsr_underTitle {
+    margin-top: 1px;
+    margin-bottom: 5px;
     float: left;
     clear: both;
+    color: #2A1003;
+}
+
+span.qsr_authors {
+    /* color: #311C10; */
+
+}
+span.qsr_journal {
+    font-style: italic;
 }
 
 span.qscience_search_result_title {
@@ -109,19 +119,46 @@ span.qscience_search_result_abstract {
     font-weight: normal;
 }
 
+span.qsr_abs_dots {
+    margin-left: 2px;
+    padding: 0px 2px;
+    font-size: small;
+    color: #4186D3;
+    /*
+       font-weight: bold;
+       border: 1px dotted #4186D3;
+       background: #CFC7D7;
+    */
+}
+
+span.qsr_abs_dots:hover {
+    /* background: white; */
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+
 span.qsr_friend_more {
     margin-left: 10px;
-    background: #CFF;
+    padding: 1px 3px 1px 1px;
+    color: #73041A;
+    background: #DCDCDC; /* #E1CFD3; */
+    border: 1px dotted #73041A;
     cursor: pointer;
+}
+
+span.qsr_friend_more:hover {
+    background: white;
 }
 
 /* Similar results */
 
 span.duplicatedText {
+    color: #73041A;
     font-size: 14px;
     font-family: monospace;
     font-weight: bold;
-    color: #CCC;
 }
 
 div.qscience_search_result_similar {
@@ -166,7 +203,9 @@ span#hideconsole {
     cursor: pointer;
 }
 
-
+span#hideconsole:hover {
+    background: #DCDCDC;
+}
 
 div#console span.info {
 

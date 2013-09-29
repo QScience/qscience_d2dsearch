@@ -36,7 +36,7 @@ function qscience_d2dsearch_main() {
   $build['main'][] = drupal_get_form('qscience_d2dsearch_form_search');
 
   $build['results'] = array(
-    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Searching...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found"></span><span id="qsr_duplicates"></span><span id="qsr_displayed"></span></div><div id="qscience_d2dsearch_results"></div>',
+    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Search started...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found"></span><span id="qsr_duplicates"></span><span id="qsr_displayed"></span></div><div id="qscience_d2dsearch_results"></div>',
   );
 
   return $build;

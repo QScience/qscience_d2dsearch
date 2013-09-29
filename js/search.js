@@ -36,9 +36,8 @@ jQuery(document).ready(function(){
         // The updated object o contains the id of the div to update.
         friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
         if (friendCountSpan) {
-            friendCountSpan.innerHTML = '(+' + o.similar.length + ')';
-
-
+            friendCountSpan.innerHTML = '+' + o.similar.length;
+            friendCountSpan.style.display = '';
             parentDiv = document.getElementById('qsr_similar_' + o.idx);
             parentDiv.appendChild(childDiv);
 
@@ -152,17 +151,20 @@ jQuery(document).ready(function(){
         return -1;
     }
 
-    function toggleAbs(img) {
-        var e, eId;
-        eId = 'abs_' + img.id.substr('toggler_'.length);
-        e = document.getElementById(eId);
+    function toggleAbs(dots) {
+        var e, id, dots;
+        id = dots.id.substr('qsr_abs_dots_'.length);
+        e = document.getElementById('abs_' + id);
+        // dots = document.getElementById('_' + id);
         if (e.style.display === 'block') {
             e.style.display = 'none';
-            img.src = MODULE_PATH + 'images/plus.png';
+            //img.src = MODULE_PATH + 'images/plus.png';
+            dots.innerHTML = '(...)';
         }
         else {
             e.style.display = 'block';
-            img.src =  MODULE_PATH + 'images/minus.png';
+            //img.src =  MODULE_PATH + 'images/minus.png';
+            dots.innerHTML = '(hide)';
         }
     }
     function progress() {
@@ -183,8 +185,8 @@ jQuery(document).ready(function(){
     function addResult(data, idx) {
         var div, friend, content, actions, similar;
         var friendLink, moreFriends, duplicatedTextSpan;
-        var title, authors, journal, authorsString, abstractField;
-        var toggler;
+        var title, underTitle, authors, journal, authorsString, abstractField;
+        var abs1, abs2, dots, toggler;
         var idxExisting, sameDiv, sameFriend, sameFriendSpan;
         var i, len;
 
@@ -232,6 +234,7 @@ jQuery(document).ready(function(){
         sameFriendSpan = document.createElement('span');
         sameFriendSpan.id = 'qsr_friend_more_' + idx;
         sameFriendSpan.className = 'qsr_friend_more';
+        sameFriendSpan.style.display = 'none';
         friend.appendChild(sameFriendSpan);
 
         // Content.
@@ -241,10 +244,15 @@ jQuery(document).ready(function(){
         title.className = 'qscience_search_result_title';
         title.appendChild(document.createTextNode(data.title));
 
+        // Under title.
+        underTitle = document.createElement('span');
+        underTitle.className = 'qsr_underTitle';
+
         // Authors.
-        authors = document.createElement('span');
-        authors.className = "qsr_authors";
         if (data.authors.length) {
+            authors = document.createElement('span');
+            authors.className = "qsr_authors";
+
             authorsString = '';
             len = data.authors.length;
             for (i = 0; i < len; i++) {
@@ -253,13 +261,21 @@ jQuery(document).ready(function(){
                     authorsString += ', ';
                 }
             }
+            // Add a separator if a journal is found.
+            if (data.journal !== '') {
+                authorsString += ' - ';
+            }
             authors.appendChild(document.createTextNode(authorsString));
+            underTitle.appendChild(authors);
         }
 
         // Journal.
-        journal = document.createElement('span');
-        journal.className = 'qsr_journal';
-        journal.appendChild(document.createTextNode(data.journal));
+        if (data.journal !== '') {
+            journal = document.createElement('span');
+            journal.className = 'qsr_journal';
+            journal.appendChild(document.createTextNode(data.journal));
+            underTitle.appendChild(journal);
+        }
 
         // Abstract.
         abstractField = document.createElement('span');
@@ -267,13 +283,18 @@ jQuery(document).ready(function(){
 
         // Display only first part of the abstract if it is too long.
         if (data.abstractField.length > ABS_MAX_LENGTH) {
-            toggler = document.createElement('img');
-            toggler.id = 'toggler_' + idx;
-            toggler.src = MODULE_PATH + 'images/plus.png';
+            //toggler = document.createElement('img');
+            //toggler.id = 'toggler_' + idx;
+            //toggler.src = MODULE_PATH + 'images/plus.png';
 
             abs1 = document.createElement('span');
             abs1.appendChild(document.createTextNode(
                 data.abstractField.substr(0, ABS_MAX_LENGTH)));
+
+            dots = document.createElement('span');
+            dots.id = 'qsr_abs_dots_' + idx;
+            dots.className = 'qsr_abs_dots';
+            dots.appendChild(document.createTextNode('(...)'));
 
             abs2 = document.createElement('span');
             abs2.style.display = 'none';
@@ -281,22 +302,22 @@ jQuery(document).ready(function(){
             abs2.appendChild(document.createTextNode(
                 data.abstractField.substr(ABS_MAX_LENGTH)));
 
-
-            toggler.onclick = function() {
+            dots.onclick = function() {
                 toggleAbs(this);
             };
 
             abstractField.appendChild(abs1);
             abstractField.appendChild(abs2);
-            abstractField.appendChild(toggler);
+            abstractField.appendChild(dots);
+            // abstractField.appendChild(toggler);
         }
         else {
             abstractField.appendChild(document.createTextNode(data.abstractField));
         }
 
+        // Adding title, underTitle, and abstract to main content div.
         content.appendChild(title);
-        content.appendChild(authors);
-        content.appendChild(journal);
+        content.appendChild(underTitle);
         content.appendChild(abstractField);
 
         // Similar.

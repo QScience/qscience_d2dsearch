@@ -61,12 +61,10 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   $my_instance = d2d_api_own_instance_get();
   $my_url = substr($my_instance['url'], 0,
                    strpos($my_instance['url'], 'xmlrpc.php'));
-
   $my_name = empty($my_instance['name']) ? $my_url : $my_instance['name'];
 
   $result_array = array();
-  // TODO: load other fields, like author reference.
-  foreach($items as $item) {
+  foreach ($items as $item) {
 
     // Loading authors.
     $authors = '';
@@ -79,7 +77,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
       }
       $authorObjs = entity_load('node', $authorNids);
       $authors = array();
-      foreach($authorObjs as $author) {
+      foreach ($authorObjs as $author) {
         // TODO: Should take first and last separate ??
         // $first_name = $author->first_name['und'][0]['value'];
         // $last_name = $author->last_name['und'103][0]['value'];
