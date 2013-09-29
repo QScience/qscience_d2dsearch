@@ -183,7 +183,7 @@ jQuery(document).ready(function(){
     function addResult(data, idx) {
         var div, friend, content, actions, similar;
         var friendLink, moreFriends, duplicatedTextSpan;
-        var title, authors, authorsString,  abstractField;
+        var title, authors, journal, authorsString, abstractField;
         var toggler;
         var idxExisting, sameDiv, sameFriend, sameFriendSpan;
         var i, len;
@@ -235,10 +235,13 @@ jQuery(document).ready(function(){
         friend.appendChild(sameFriendSpan);
 
         // Content.
+
+        // Title.
         title = document.createElement('span');
         title.className = 'qscience_search_result_title';
         title.appendChild(document.createTextNode(data.title));
 
+        // Authors.
         authors = document.createElement('span');
         authors.className = "qsr_authors";
         if (data.authors.length) {
@@ -253,6 +256,12 @@ jQuery(document).ready(function(){
             authors.appendChild(document.createTextNode(authorsString));
         }
 
+        // Journal.
+        journal = document.createElement('span');
+        journal.className = 'qsr_journal';
+        journal.appendChild(document.createTextNode(data.journal));
+
+        // Abstract.
         abstractField = document.createElement('span');
         abstractField.className = 'qscience_search_result_abstract';
 
@@ -287,8 +296,8 @@ jQuery(document).ready(function(){
 
         content.appendChild(title);
         content.appendChild(authors);
+        content.appendChild(journal);
         content.appendChild(abstractField);
-
 
         // Similar.
         duplicatedTextSpan = document.createElement('span');

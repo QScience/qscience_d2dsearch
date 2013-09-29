@@ -98,9 +98,9 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
     // Loading Journal.
     $journal = '';
     if (!empty($item->journal_reference)) {
-      $journalNid = $item->journal_reference['target_id'];
-      $journalObj = entity_load('node', $journalNid);
       // TODO support multilanguage.
+      $journalNid = $item->journal_reference['und'][0]['target_id'];
+      $journalObj = entity_load('node', $journalNid);
       $journal = $journalObj['und'][0]['value'];
     }
 
