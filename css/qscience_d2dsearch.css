@@ -47,23 +47,24 @@ input#edit-search-string {
 
 div.qscience_search_result {
     clear: both;
-    min-height: 100px;
+    height: 100%;
+    /* min-height: 100px; */
     padding: 5px 20px;
-    margin: 10px;
-    /* border: 1px dotted #CCC; */
+    margin: 0px;
+    border-top: 1px dotted #CCC;
     background: white;
 }
 
 div.my_result {
-    background: #FAF6E6;
+    /* background: #FAF6E6; */
     display: block;
     clear: both;
 }
 
 
 div.qscience_search_result div {
+    /*    
     clear: both;
-    /*
     width: 100%;
     display: inline;
     float: left;
@@ -74,7 +75,7 @@ div.qscience_search_result div {
 div.qscience_search_result_friend {
     clear: both;
     font-weight: bold;
-    border-bottom: 1px dotted #CCC;
+    /* border-bottom: 1px dotted #CCC; */
     color: #4186D3;
     padding: 1px 3px 1px 3px;
     /*background: #689AD3; */
@@ -159,11 +160,13 @@ span.duplicatedText {
     font-size: 14px;
     font-family: monospace;
     font-weight: bold;
+    margin-top: 20px;
 }
 
 div.qscience_search_result_similar {
     clear: both;
     font-size: 10px;
+    margin-left: 60px;
 }
 div.qscience_search_result_similar span.qscience_search_result_title {
     font-size: 12px;
@@ -179,6 +182,7 @@ div#console {
     font-family: monospace;
     background: #FFC;
     border: 1px dotted #CCC;
+    padding-left: 3px;
 }
 
 div#console span {
@@ -204,7 +208,7 @@ span#hideconsole {
 }
 
 span#hideconsole:hover {
-    background: #DCDCDC;
+    background: #ECECEC;
 }
 
 div#console span.info {
