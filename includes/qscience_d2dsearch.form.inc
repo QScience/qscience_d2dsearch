@@ -64,13 +64,13 @@ function qscience_d2dsearch_form_search() {
     '#type' => 'select',
     //'#title' => t('Search type.'),
     '#options' => array(
-      'single_friend' => t('Local only'),
+      'local_only' => t('Local only'),
       //'single_friend' => t('Single Friend'),
-      'all_friends' => t('All Friends'),
+      'friends' => t('Friends'),
       'friends_of_friends' => t('Friends of Friends'),
       'flood' => t('Flood Search'),
     ),
-    '#default_value' => 'flood',
+    '#default_value' => 'friends',
     '#required' => TRUE,
   );
 
@@ -184,23 +184,41 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
 
   $imploded_query = d2d_implode($query_array);
   if ($imploded_query === FALSE) {
-    drupal_set_message(t('An error occurred while preparing the query to send out. Search aborted.', 'error'));
+    drupal_set_message(t('An error occurred while preparing the query to send out. Search aborted.',
+                         'error'));
     return;
   }
 
+  switch($form_state['values']['search_type']) {
+  case 'local_only':
+      $friends = array();
+      $n_hops = 0;
+      break;
+  case 'friends':
+      $friends = NULL;
+      $n_hops = 1;
+      break;
+  case 'friends_of_friends':
+      $friends = NULL;
+      $n_hops = 2;
+      break;
+  case 'flood':
+      $friends = NULL;
+      $n_hops = NULL;
+  }
+
+  // Local search always performed.
   $query_id = d2dsearch_query_start('qscience_d2dsearch_papers',
               $imploded_query,
-              NULL,
-              NULL,
+              $friends,
+              $n_hops,
               TRUE
-              //$form_state['values']['local_search']
   );
 
   if (!_d2dsearch_check_query_id($query_id)) {
     drupal_set_message(t('Failed performing search.'));
   }
   else {
-
     $form_state['rebuild'] = TRUE;
     $installFolder = drupal_get_path('module','qscience_d2dsearch').'/';
     $path = drupal_get_path('module', 'qscience_d2dsearch');
@@ -212,6 +230,7 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
       'query_id' => $query_id,
       'installFolder' => $installFolder,
       'my_instance' => $my_url,
+      'searchType' => $form_state['values']['search_type'],
     ), 'setting');
     drupal_add_js($path . '/js/levenshtein.js');
     drupal_add_js($path . '/js/nddb-full.js');

@@ -7,7 +7,7 @@ jQuery(document).ready(function(){
     var ids, INCREMENT;
     var resultDiv, progressDiv, table;
     var progressbar, console, header;
-    var MY_INSTANCE;
+    var MY_INSTANCE, SEARCH_TYPE;
     var abs1, ab2, ABS_MAX_LENGTH;
     var hideconsole;
     var displayed, duplicates, found;
@@ -32,8 +32,6 @@ jQuery(document).ready(function(){
         update.similar = o.similar;
         childDiv = update.div;
         delete update.div;
-
-
 
         // The updated object o contains the id of the div to update.
         friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
@@ -66,6 +64,7 @@ jQuery(document).ready(function(){
     BASE_PATH = Drupal.settings.basePath;
     MODULE_PATH = BASE_PATH + Drupal.settings.installFolder + '/';
     MY_INSTANCE = Drupal.settings.my_instance;
+    SEARCH_TYPE = Drupal.settings.searchType;
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     MIN_LEV_DIST = 5;
@@ -113,7 +112,17 @@ jQuery(document).ready(function(){
             progressLabel.text( progressbar.progressbar( "value" ) + "%" );
         },
         complete: function() {
-            progressLabel.text( "Search completed." );
+            var checkAgain;
+            checkAgain = document.createElement('span');
+            checkAgain.appendChild(document.createTextNode('Check again.'));
+            checkAgain.onclick = function() {
+                // Reset progress bar status.
+                progressbar.progressbar({ value: 0 });
+                log('info', 'search restarted');
+                worker();
+            }
+            progressLabel.html( "Search completed. " );
+            progressLabel.append(checkAgain);
         }
     });
 
@@ -283,7 +292,7 @@ jQuery(document).ready(function(){
         if (idxExisting === -1) {
             // Appending the new result into the result div.
             resultDiv.appendChild(div);
-            log('info', 'new result added.');
+            log('info', data.friend_url + ': new result added.');
             updateHeader({
                 found: db.db.length,
                 displayed: db.db.length
@@ -294,7 +303,7 @@ jQuery(document).ready(function(){
                 similar: idx,
                 div: div
             });
-            log('info', 'similar result found.');
+            log('info', data.friend_url + ': similar result found.');
             updateHeader({
                 found: db.db.length,
                 duplicates: ++countDuplicates,
@@ -305,8 +314,9 @@ jQuery(document).ready(function(){
 
 // jQuery worker for AJAX requests.
 
-    log('info', 'search started...');
-    (function worker() {
+    log('info', SEARCH_TYPE + ' search started...');
+
+    function worker() {
         jQuery.ajax({
             url: '?q=qscience_search/get_result',
             data: { 'query_id': Drupal.settings.query_id, 'ids': ids },
@@ -326,7 +336,7 @@ jQuery(document).ready(function(){
                     return;
                 }
                 //log(data.new_results);
-                log('info', 'new data received');
+                log('info', 'new data received.');
 
                 ids = data.ids;
 
@@ -345,7 +355,7 @@ jQuery(document).ready(function(){
                 // debugger;
                 // Schedule the next request when the current one's complete
 	        if (progressbar.progressbar( "value" ) < 100) {
-      	            setTimeout(worker, 500);
+      	            setTimeout(worker, 1000);
 	        }
                 else {
                     log('info', 'search completed.');
@@ -355,5 +365,8 @@ jQuery(document).ready(function(){
                 }
             }
         });
-    })()
+    }
+
+    // Start search.
+    worker();
 });

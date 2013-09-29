@@ -184,6 +184,7 @@ div#console span.silly {
 
 .progress-label {
     position: absolute;
+    margin-left: 5px;
     left: 50%
     top: 4px;
     font-weight: bold;
