@@ -48,7 +48,7 @@ input#edit-search-string {
 div.qscience_search_result {
     clear: both;
     min-height: 100px;
-    padding: 20px;
+    padding: 5px 20px;
     margin: 10px;
     border: 1px dotted #CCC;
     background: white;
@@ -90,6 +90,11 @@ div.qscience_search_result_content {
     padding: 5px;
 }
 
+span.qsr_authors {
+    color: #311C10;
+    float: left;
+    clear: both;
+}
 
 span.qscience_search_result_title {
     font-weight: bold;
@@ -189,6 +194,17 @@ div#console span.silly {
     top: 4px;
     font-weight: bold;
     text-shadow: 1px 1px 0 #fff;
+}
+
+span#checkAgain {
+    margin-left: 3px;
+    font-style: italic;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+span#checkAgain:hover {
+    text-decoration: underline;
 }
 
 /* Header */

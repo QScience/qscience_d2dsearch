@@ -325,6 +325,7 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
           'friend_url' => 'is_string',
           'title' => 'is_string',
           'abstractField' => 'is_string',
+          'journal' => 'is_string',
           'authors' => 'is_string',
           'time' => 'd2d_check_convert_int',
         ));

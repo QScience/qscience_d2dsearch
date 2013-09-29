@@ -67,11 +67,11 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   $result_array = array();
   // TODO: load other fields, like author reference.
   foreach($items as $item) {
+
+    // Loading authors.
     $authors = '';
     if (!empty($item->author_reference)) {
-
-      // Loading authors.
-      // TODO support multilanguage
+      // TODO support multilanguage.
       $authorRefs = $item->author_reference['und'];
       $authorNids = array();
       foreach($authorRefs as $ref) {
@@ -94,14 +94,28 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
         $authors = '';
       }
     }
+
+    // Loading Journal.
+    $journal = '';
+    if (!empty($item->journal_reference)) {
+      $journalNid = $item->journal_reference['target_id'];
+      $journalObj = entity_load('node', $journalNid);
+      // TODO support multilanguage.
+      $journal = $journalObj['und'][0]['value'];
+    }
+
+    // Loading. abstract.
+    // TODO support multilanguage.
     $abstract = empty($item->abstract) ?
         'no abstract' : $item->abstract['und'][0]['value'];
+
     $record = array(
       'friend' => $my_name,
       'friend_url' => $my_url,
       'title' => $item->title,
       'abstractField' => $abstract,
       'authors' => $authors,
+      'journal' => $journal,
       'time' => $item->created,
     );
     $result_array[] = d2d_implode($record);

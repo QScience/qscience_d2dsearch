@@ -114,7 +114,8 @@ jQuery(document).ready(function(){
         complete: function() {
             var checkAgain;
             checkAgain = document.createElement('span');
-            checkAgain.appendChild(document.createTextNode('Check again.'));
+            checkAgain.id = "checkAgain";
+            checkAgain.appendChild(document.createTextNode('Check again'));
             checkAgain.onclick = function() {
                 // Reset progress bar status.
                 progressbar.progressbar({ value: 0 });
@@ -239,6 +240,7 @@ jQuery(document).ready(function(){
         title.appendChild(document.createTextNode(data.title));
 
         authors = document.createElement('span');
+        authors.className = "qsr_authors";
         if (data.authors.length) {
             authorsString = '';
             len = data.authors.length;
