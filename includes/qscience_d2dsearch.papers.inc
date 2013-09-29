@@ -67,7 +67,33 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   $result_array = array();
   // TODO: load other fields, like author reference.
   foreach($items as $item) {
-    $a = node_view($item);
+    $authors = '';
+    if (!empty($item->author_reference)) {
+
+      // Loading authors.
+      // TODO support multilanguage
+      $authorRefs = $item->author_reference['und'];
+      $authorNids = array();
+      foreach($authorRefs as $ref) {
+        $authorNids[] = $ref['target_id'];
+      }
+      $authorObjs = entity_load('node', $authorNids);
+      $authors = array();
+      foreach($authorObjs as $author) {
+        // TODO: Should take first and last separate ??
+        // $first_name = $author->first_name['und'][0]['value'];
+        // $last_name = $author->last_name['und'][0]['value'];
+        // $authors[] = array(
+        //  'first_name' => $first_name,
+        //  'last_name' => $last_name,
+        // );
+        $authors[] = $author->title;
+      }
+      $authors = d2d_implode($authors);
+      if ($authors === FALSE) {
+        $authors = '';
+      }
+    }
     $abstract = empty($item->abstract) ?
         'no abstract' : $item->abstract['und'][0]['value'];
     $record = array(

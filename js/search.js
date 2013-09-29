@@ -182,9 +182,10 @@ jQuery(document).ready(function(){
     function addResult(data, idx) {
         var div, friend, content, actions, similar;
         var friendLink, moreFriends, duplicatedTextSpan;
-        var title, abstractField;
+        var title, authors, authorsString,  abstractField;
         var toggler;
         var idxExisting, sameDiv, sameFriend, sameFriendSpan;
+        var i, len;
 
         // Creating the div container.
         div = document.createElement('div');
@@ -237,6 +238,19 @@ jQuery(document).ready(function(){
         title.className = 'qscience_search_result_title';
         title.appendChild(document.createTextNode(data.title));
 
+        authors = document.createElement('span');
+        if (data.authors.length) {
+            authorsString = '';
+            len = data.authors.length;
+            for (i = 0; i < len; i++) {
+                authorsString += data.authors[i];
+                if (i !== (len - 1)) {
+                    authorsString += ', ';
+                }
+            }
+            authors.appendChild(document.createTextNode(authorsString));
+        }
+
         abstractField = document.createElement('span');
         abstractField.className = 'qscience_search_result_abstract';
 
@@ -270,6 +284,7 @@ jQuery(document).ready(function(){
         }
 
         content.appendChild(title);
+        content.appendChild(authors);
         content.appendChild(abstractField);
 
 

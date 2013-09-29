@@ -54,7 +54,6 @@ function qscience_d2dsearch_form_search() {
 
   $form['search_container']['search_string'] = array(
     '#type' => 'textfield',
-    //'#title' => t('Your query string'),
     '#size' => 40,
     '#maxlength' => QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH,
     '#required' => TRUE,
@@ -62,7 +61,6 @@ function qscience_d2dsearch_form_search() {
 
   $form['search_container']['search_type'] = array(
     '#type' => 'select',
-    //'#title' => t('Search type.'),
     '#options' => array(
       'local_only' => t('Local only'),
       //'single_friend' => t('Single Friend'),
@@ -327,12 +325,23 @@ function _qscience_d2dsearch_get_new_results($query_id, &$ids) {
           'friend_url' => 'is_string',
           'title' => 'is_string',
           'abstractField' => 'is_string',
+          'authors' => 'is_string',
           'time' => 'd2d_check_convert_int',
         ));
         if (!$check) {
           watchdog('qscience_d2dsearch', 'Received malformed result: ' . $result);
           continue;
         }
+
+        // Exploding authors.
+        $exploded_authors = d2d_explode($exploded_result['authors']);
+        if ($exploded_authors !== FALSE) {
+            $exploded_result['authors'] = $exploded_authors;
+        }
+        else {
+            $exploded_result['authors'] = array();
+        }
+
         $out[] = $exploded_result;
       }
     }
