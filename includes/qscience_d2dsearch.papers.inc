@@ -101,6 +101,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
       'friend_url' => $my_url,
       'title' => $item->title,
       'abstractField' => $abstract,
+      'authors' => $authors,
       'time' => $item->created,
     );
     $result_array[] = d2d_implode($record);
