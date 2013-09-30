@@ -138,19 +138,18 @@ span.qsr_abs_dots:hover {
     cursor: pointer;
 }
 
-
-
 span.qsr_friend_more {
     margin-left: 10px;
     padding: 1px 3px 1px 1px;
     color: #73041A;
-    background: #DCDCDC; /* #E1CFD3; */
+    /*background: #DCDCDC; /* #E1CFD3; */
     border: 1px dotted #73041A;
     cursor: pointer;
 }
 
 span.qsr_friend_more:hover {
-    background: white;
+    /* color: #A60000; */
+    background: #FFDCDC;
 }
 
 /* Similar results */
@@ -261,4 +260,46 @@ div#qscience_d2dsearch_results_header {
 div#qscience_d2dsearch_results_header span {
     margin: 5px;
 }
+
+/* Paginator */
+
+div#paginator {
+    clear: both;
+    text-align: center;
+    margin: auto;
+    padding: 5px;
+    margin-top: 30px;
+}
+
+div#paginator span#pages span {
+    color: #4186D3;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+div#paginator span#pages span:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+div#paginator span#pages span.curPage {
+    font-weight: bold;
+    color: #111;
+}
+
+div#paginator span#pages span.curPage:hover {
+    text-decoration: none;
+    cursor: auto;
+}
+
+span#prev_results, span#next_results {
+    font-weight: bold;
+    color: #111;
+} 
+
+span#prev_results:hover, span#next_results:hover {
+    text-decoration: underline;
+    cursor: pointer;
+} 
+
 

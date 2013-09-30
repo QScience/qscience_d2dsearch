@@ -12,18 +12,68 @@ jQuery(document).ready(function(){
     var hideconsole;
     var displayed, duplicates, found;
     var countDuplicates, countDisplayed;
+    var paginator, prev_results, next_results, pages;
+    var curLastPage, curDisplayedPage;
     var MIN_LEV_DIST;
-    var db;
+    var db, pagesDB;
+    var displayN, currentN;
 
-    // Creating database.
+    // Creating Pages database.
+    pagesDB = new NDDB({
+        update: { indexes: true }
+    });
+    pagesDB.index('page', function(o) {
+        return o.page;
+    });
+    // Creating Results database.
     db = new NDDB({
         update: { indexes: true }
     });
     db.on('insert', function(o) {
+        var idxExisting;
         o.idx = db.length;
         o.similar = [];
-        addResult(o, db.length);
+        o.div = createResultDiv(o, db.length);
+        
+         // Is this already existing ?
+        idxExisting = isSamePub(o.idx, o.title);
+        if (idxExisting === -1) {
+            o.newResult = true;
+            log('info', o.friend_url + ': new result added.');
+        }
+        else {
+            o.newResult = false;
+            db.idx.update(idxExisting, {
+                similar: o.idx,
+                div: o.div
+            });
+            log('info', o.friend_url + ': similar result found.');
+            countDuplicates++;
+        }
+
+        if (db.db.length >= displayN) {
+            // We cannot append them directly before the above condition is met
+            // because object is not yet inserted in db, and object.div is not
+            // sync with the browser document.
+
+            if (db.db.length % displayN === 0) {
+                // Indexes are not build on first insert, so let's do it now.
+                if (db.db.length === displayN) {
+                    // pagesDB.rebuildIndexes();
+                    displayLot(JSUS.seq(0, displayN - 1));
+                }
+                curLastPage = addPage(curLastPage, displayN);
+            }
+        }
+        
+        // Update header. 'displayed' was already updated, and db + 1 because
+        // this element has not yet been inserted.
+        updateHeader({
+            found: (db.db.length + 1),
+            duplicates: countDuplicates,
+        });
     });
+
     db.on('update', function(o, update) {
         var friendCountSpan, parentDiv, childDiv;
         if ('undefined' === typeof update.similar) return;
@@ -34,11 +84,13 @@ jQuery(document).ready(function(){
         delete update.div;
 
         // The updated object o contains the id of the div to update.
-        friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
+        //friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
+        friendCountSpan = o.div.childNodes[0].childNodes[1];
         if (friendCountSpan) {
             friendCountSpan.innerHTML = '+' + o.similar.length;
             friendCountSpan.style.display = '';
-            parentDiv = document.getElementById('qsr_similar_' + o.idx);
+            //parentDiv = document.getElementById('qsr_similar_' + o.idx);
+            parentDiv = o.div.childNodes[3];
             parentDiv.appendChild(childDiv);
 
             friendCountSpan.onclick = function() {
@@ -49,7 +101,6 @@ jQuery(document).ready(function(){
                     parentDiv.style.display = '';
                 }
             }
-
         }
         else {
             log('error', 'could not find similar result with id: ' + o.idx);
@@ -57,6 +108,9 @@ jQuery(document).ready(function(){
     });
     db.index('idx', function(o) {
         return o.idx;
+    });
+    db.view('appended', function(o) {
+        return o.appended;
     });
 
     // Init constants.
@@ -70,6 +124,12 @@ jQuery(document).ready(function(){
 
     // Init other variables.
 
+    // How many results display in the page.
+    displayN = 10;   
+    countDisplayed = 0;
+    countDuplicates = 0;
+    currentN = displayN;
+    curLastPage = 0;
     // The list of ids (to be sent on every request).
     ids = '';
     // The number of duplicates results, according to the similarity distance.
@@ -83,6 +143,19 @@ jQuery(document).ready(function(){
     displayed = document.getElementById('qsr_displayed');
     duplicates = document.getElementById('qsr_duplicates');
 
+    next_results = document.getElementById('next_results');
+    prev_results = document.getElementById('prev_results');
+
+    next_results.onclick = function() {
+        pageClicked((curDisplayedPage + 1));
+    };
+    prev_results.onclick = function() {
+        pageClicked((curDisplayedPage - 1));
+    };
+    
+    pages = document.getElementById('pages');
+
+    // Making hidden elements visible.
     myConsole = document.getElementById('console');
     myConsole.style.display = '';
 
@@ -99,6 +172,9 @@ jQuery(document).ready(function(){
             hideconsole.innerHTML = ' >> show console';
         }
     };
+
+    paginator = document.getElementById('paginator');
+    paginator.style.display = '';
 
     // Creating the Progress Bar.
     progressbar = jQuery( "#progressbar" );
@@ -125,6 +201,129 @@ jQuery(document).ready(function(){
             progressLabel.append(checkAgain);
         }
     });
+
+    function pageClicked(pageId) {        
+        var lastPage;
+
+        next_results.style.display = '';
+        prev_results.style.display = '';
+
+        if (pageId === 1) {
+            prev_results.style.display = 'none';            
+        }
+        else if (pageId === curLastPage) {
+            next_results.style.display = 'none';
+        }
+
+        // Re-set the last page as clickable.
+        lastPage = pagesDB.page.get(curDisplayedPage);
+        lastPage.span.className = '';
+        lastPage.span.onclick = function() {
+            pageClicked(lastPage.page);
+        };
+                
+        // Make the new page non-clickable.
+        page = pagesDB.page.get(pageId);
+        page.span.className = 'curPage';
+        page.span.onclick = null;
+
+        // Set the new page as the current displayed page.
+        curDisplayedPage = pageId;
+
+        // Update display.
+        displayLot(page.ids, true);
+
+        // Scroll Up.
+        resultDiv.scrollTop = 0;
+    }
+
+    function addPage(curLastPage, range) {
+        var page, newLastPage, ids, from, to;
+        // Computing ranges.
+        newLastPage = curLastPage + 1;
+        from = curLastPage * range;
+        to = (newLastPage * range) - 1;
+        ids = JSUS.seq(from, to);
+        // Creating element.
+        page = document.createElement('span');
+        page.id = "page_" + newLastPage;
+        if (curLastPage === 0) {
+            // not clickable.
+            page.className = 'curPage';
+            // currently displayed.
+            curDisplayedPage = newLastPage;
+        }
+        else {
+            page.onclick = function() {
+                pageClicked(newLastPage);
+            }
+        }
+        page.appendChild(document.createTextNode(newLastPage));
+        pages.appendChild(page);
+        pagesDB.insert({
+            span: page,
+            ids: ids,
+            page: newLastPage
+        });
+        return newLastPage
+    }
+
+    function displayLot(ids, only) {
+        var i, len, appended;
+        only = only || false;
+        
+        // TODO: there might be an overlap between new elements and old 
+        // elements. In this case, we should not remove such elements 
+        // and re-add them again.
+
+        // Hiding currently displayed elements.
+        if (only) {
+            appended = db.appended.db;
+            i = -1, len = appended.length;
+            for ( ; ++i < len ; ) {
+                makeResultInvisible(appended[i]);
+            }            
+        }
+        // Showing the new elements;
+        i = -1, len = ids.length;
+        for ( ; ++i < len ; ) {
+            makeResultVisible(db.idx.get(ids[i]));
+        }
+    }
+
+    function makeResultVisible(o) {
+//        if (o.div.style.display = 'none') {
+//            o.div.style.display = '';
+//        }
+        if (!o.appended) {
+            resultDiv.appendChild(o.div);
+            db.idx.update(o.idx, { appended: true });
+            // Update header.
+            updateHeader({
+                displayed: ++countDisplayed
+            });
+        }
+    }
+
+    function makeResultInvisible(o) {
+//        if (o.div.style.display = '') {
+//            o.div.style.display = 'none';
+//        }
+        if (o.appended) {
+            try {
+                resultDiv.removeChild(o.div);
+                db.idx.update(o.idx, { appended: false });
+                // Update header.
+                updateHeader({
+                    displayed: --countDisplayed
+                });
+            }
+            catch(e) {
+                log('error', e);
+            }
+        }
+        
+    }
 
     function updateHeader(obj) {
         if ('undefined' !== typeof obj.found) {
@@ -155,15 +354,12 @@ jQuery(document).ready(function(){
         var e, id, dots;
         id = dots.id.substr('qsr_abs_dots_'.length);
         e = document.getElementById('abs_' + id);
-        // dots = document.getElementById('_' + id);
         if (e.style.display === 'block') {
             e.style.display = 'none';
-            //img.src = MODULE_PATH + 'images/plus.png';
             dots.innerHTML = '(...)';
         }
         else {
             e.style.display = 'block';
-            //img.src =  MODULE_PATH + 'images/minus.png';
             dots.innerHTML = '(hide)';
         }
     }
@@ -182,12 +378,12 @@ jQuery(document).ready(function(){
         myConsole.scrollTop = myConsole.scrollHeight
     }
 
-    function addResult(data, idx) {
+    function createResultDiv(data, idx) {
         var div, friend, content, actions, similar;
         var friendLink, moreFriends, duplicatedTextSpan;
         var title, underTitle, authors, journal, authorsString, abstractField;
         var abs1, abs2, dots, toggler;
-        var idxExisting, sameDiv, sameFriend, sameFriendSpan;
+        var sameDiv, sameFriend, sameFriendSpan;
         var i, len;
 
         // Creating the div container.
@@ -334,29 +530,7 @@ jQuery(document).ready(function(){
         div.appendChild(actions);
         div.appendChild(similar);
 
-        // Is this already existing ?
-        idxExisting = isSamePub(idx, data.title);
-        if (idxExisting === -1) {
-            // Appending the new result into the result div.
-            resultDiv.appendChild(div);
-            log('info', data.friend_url + ': new result added.');
-            updateHeader({
-                found: db.db.length,
-                displayed: db.db.length
-            });
-        }
-        else {
-            db.idx.update(idxExisting, {
-                similar: idx,
-                div: div
-            });
-            log('info', data.friend_url + ': similar result found.');
-            updateHeader({
-                found: db.db.length,
-                duplicates: ++countDuplicates,
-                displayed: db.db.length
-            });
-        }
+        return div;
     }
 
 // jQuery worker for AJAX requests.
