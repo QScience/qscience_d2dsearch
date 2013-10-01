@@ -7,6 +7,84 @@
  */
 
 /**
+ * Menu callback; imports a paper into local database.
+ */
+function _qscience_d2dsearch_import_paper(){
+  // Title.
+  $title = NULL;
+  if (isset($_POST['title'])) {
+    $title = check_plain($_POST['title']);
+  }
+  if (empty($title)) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'Missing title',
+    ));
+    return;
+  }
+  // Authors.
+  $authors = array();
+  if (isset($_POST['authors'])) {
+    foreach($authors as $a) {
+      if (check_plain($a)) {
+        array_push($authors, $a);
+      }
+    }
+  }
+  if (empty($authors)) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'Missing authors.',
+    ));
+    return;
+  }
+  // Journal.
+  $journal = NULL;
+  if (isset($_POST['journal'])) {
+    $journal = check_plain($_POST['journal']);
+  }
+  if (empty($journal)) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'Missing journal.',
+    ));
+    return;
+  }
+  // Year.
+  $year = NULL;
+  if (isset($_POST['year'])) {
+    $year = check_plain($_POST['year']);
+  }
+  if (empty($year)) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'Missing year.',
+    ));
+    return;
+  }
+   // Abstract (can be missing, must be sanitized).
+  $abstract = NULL;
+  if (isset($_POST['abstract'])) {
+    $abstract = check_plain($_POST['abstract']);
+  }
+
+
+  $node = new stdClass();
+  $node->type = 'paper';
+  node_object_prepare($node);
+  $node->title = $title;
+  $node->language = LANGUAGE_NONE;
+  $node->field_abstract[$node->language][0] = $abstract;
+
+  node_save($node);
+
+  drupal_json_output(array(
+    'success' => true,
+    'message' => 'New image node content is created',
+  ));
+}
+
+/**
  * Performs the search.
  */
 function _qscience_d2dsearch_papers_get($imploded_query) {
@@ -60,7 +138,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
   }
   $my_instance = d2d_api_own_instance_get();
   $my_url = substr($my_instance['url'], 0,
-                   strpos($my_instance['url'], 'xmlrpc.php'));
+            strpos($my_instance['url'], 'xmlrpc.php'));
   $my_name = empty($my_instance['name']) ? $my_url : $my_instance['name'];
 
   $result_array = array();
@@ -105,7 +183,7 @@ function _qscience_d2dsearch_papers_callback($imploded_query) {
     // Loading. abstract.
     // TODO support multilanguage.
     $abstract = empty($item->abstract) ?
-        'no abstract' : $item->abstract['und'][0]['value'];
+      'no abstract' : $item->abstract['und'][0]['value'];
 
     $record = array(
       'friend' => $my_name,

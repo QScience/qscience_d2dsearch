@@ -49,10 +49,10 @@ div.qscience_search_result {
     clear: both;
     height: 100%;
     /* min-height: 100px; */
-    padding: 5px 20px;
+    padding-top: 0;
     margin: 0px;
-    border-top: 1px dotted #CCC;
-    background: white;
+    /* border-top: 1px dotted #CCC;
+    background: #FFC2F2; */
 }
 
 div.my_result {
@@ -63,7 +63,7 @@ div.my_result {
 
 
 div.qscience_search_result div {
-    /*    
+    /*
     clear: both;
     width: 100%;
     display: inline;
@@ -79,12 +79,6 @@ div.qscience_search_result_friend {
     color: #4186D3;
     padding: 1px 3px 1px 3px;
     /*background: #689AD3; */
-}
-
-div.qscience_search_result_actions {
-    width: 25%;
-    float: right;
-    text-align: right;
 }
 
 div.qscience_search_result_content {
@@ -295,11 +289,29 @@ div#paginator span#pages span.curPage:hover {
 span#prev_results, span#next_results {
     font-weight: bold;
     color: #111;
-} 
+}
 
 span#prev_results:hover, span#next_results:hover {
     text-decoration: underline;
     cursor: pointer;
-} 
+}
+
+
+/* Actions */
+
+div.qscience_search_result_actions {
+    width: 100%;
+    float: left;
+    text-align: right;
+    clear: both;
+    /* border-bottom: 1px solid #CCC;
+     border-bottom: 1px solid #CCC; */
+    /* background: #EFF8FC; */
+    height: 20px;
+}
+
+div.qscience_search_result_actions img {
+    cursor: pointer;
+}
 
 

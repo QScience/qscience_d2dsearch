@@ -15,15 +15,19 @@ function qscience_d2dsearch_menu() {
   $items['qscience_search'] = array(
     'title' => 'QScience Search',
     'page callback' => 'qscience_d2dsearch_main',
-    'access arguments' => array('administer d2dsearch demo'),
+    'access arguments' => array('use qscience search'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 80,
   );
   $items['qscience_search/get_result'] = array(
     'page callback' => 'qscience_d2dsearch_get_results',
-    'access arguments' => array('administer d2dsearch demo'),
+    'access arguments' => array('use qscience search'),
     'type' => MENU_CALLBACK,
   );
+   $item['qscience_search/import_paper'] = array(
+     'page callback' => '_qscience_d2dsearch_import_paper',
+     'access arguments' => array('use qscience search'),
+   );
   return $items;
 }
 
@@ -32,7 +36,7 @@ function qscience_d2dsearch_menu() {
  */
 function qscience_d2dsearch_permission() {
   return array(
-    'use qscience d2d search' => array(
+    'use qscience search' => array(
       'title' => t('Use QScience D2D search'),
     ),
   );
@@ -49,3 +53,5 @@ function qscience_d2dsearch_d2dsearch_query_type() {
 
   return $types;
 }
+
+

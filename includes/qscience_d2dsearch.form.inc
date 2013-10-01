@@ -11,7 +11,7 @@ define('QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH', 64);
  * Menu callback; builds the search page.
  */
 function qscience_d2dsearch_main() {
-
+  $a = node_load(7);
   drupal_add_css(drupal_get_path('module', 'qscience_d2dsearch') . '/css/qscience_d2dsearch.css');
 
   $build['main'] = array(
@@ -35,10 +35,38 @@ function qscience_d2dsearch_main() {
 
   $build['main'][] = drupal_get_form('qscience_d2dsearch_form_search');
 
+  $addPaperBox = <<<HEREDOC
+<div id="qsr_dialog-form" title="Import paper" style="display: none">
+<p class="validateTips">All form fields are required.</p>
+<form>
+<fieldset>
+<label for="title">Title</label>
+<input type="text" name="qsr_import_paper_title" id="qsr_import_paper_title" class="text ui-widget-content ui-corner-all" />
+<span id="qsr_import_paper_authors">
+<label for="qsr_import_paper_author_1">Author</label>
+<input type="text" id="qsr_import_paper_author_1" value="" class="text ui-widget-content ui-corner-all" />
+</span>
+<label for="qsr_import_paper_journal">Journal</label>
+<input type="text" id="qsr_import_paper_journal" />
+<label for="qsr_import_paper_year">Year</label>
+<input type="text" id="qsr_import_paper_year" />
+<label for="qsr_import_paper_link">External Link</label>
+<input type="text" id="qsr_import_paper_link" />
+<label for="qsr_import_paper_abstract">Abstract</label>
+<textarea id="qsr_import_paper_abstract"></textarea>
+</fieldset>
+</form>
+</div>
+HEREDOC;
+
   $build['results'] = array(
+    '#prefix' => $addPaperBox,
     '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Search started...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found"></span><span id="qsr_duplicates"></span><span id="qsr_displayed"></span></div><div id="qscience_d2dsearch_results"></div>',
-    '#suffix' => '<div id="paginator" style="display: none"><span id="prev_results" style="display: none"><<</span><span id="pages"></span><span id="next_results">>></span></div>',
+    '#suffix' => '<div id="paginator" style="display: none"><span id="prev_results" style="display: none"><<</span><span id="pages"></span><span style="display: none" id="next_results">>></span></div>',
   );
+
+  $path = drupal_get_path('module', 'qscience_d2dsearch');
+  drupal_add_library('system', 'ui.dialog');
 
   return $build;
 }

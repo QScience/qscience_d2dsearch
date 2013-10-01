@@ -3,20 +3,37 @@
  * Javascript support of the search interface.
  */
 jQuery(document).ready(function(){
+    // Base_path and QScience_search path as taken from Drupal.
     var BASE_PATH, MODULE_PATH;
-    var ids, INCREMENT;
-    var resultDiv, progressDiv, table;
-    var progressbar, console, header;
-    var MY_INSTANCE, SEARCH_TYPE;
+    // The url of my instance (to check which results are local)
+    var MY_INSTANCE;
+    // The type of search (local, friends, friends of friends, flood)
+    var SEARCH_TYPE;
+    // Elements in the page.
+    var resultDiv, progressDiv, progressbar, console, header;
+    // Abstract parts and the max length of its first part.
     var abs1, ab2, ABS_MAX_LENGTH;
+    // The hide console button.
     var hideconsole;
+    // Elements in the header.
     var displayed, duplicates, found;
+    // Counts elements duplicates and elements displayed.
     var countDuplicates, countDisplayed;
+    // Elements of pagination.
     var paginator, prev_results, next_results, pages;
+    // Last added page, and currently displayed page.
     var curLastPage, curDisplayedPage;
+    // Minimal Levenshtein distance for two papers to be similar.
     var MIN_LEV_DIST;
+    // NDDB database of pages, and results;
     var db, pagesDB;
-    var displayN, currentN;
+    // How many results to display per page
+    var displayN;
+    // Button to open the jQuery dialog to import a paper.
+    var importPaper;
+    // Input elements of the jQuery dialog.
+    var dlg, dlgAuthors, dlgAbstract, dlgTitle, dlgAuthor1, dlgYear;
+    var dlgJournal, dlgLink;
 
     // Creating Pages database.
     pagesDB = new NDDB({
@@ -34,8 +51,8 @@ jQuery(document).ready(function(){
         o.idx = db.length;
         o.similar = [];
         o.div = createResultDiv(o, db.length);
-        
-         // Is this already existing ?
+
+        // Is this already existing ?
         idxExisting = isSamePub(o.idx, o.title);
         if (idxExisting === -1) {
             o.newResult = true;
@@ -50,28 +67,6 @@ jQuery(document).ready(function(){
             log('info', o.friend_url + ': similar result found.');
             countDuplicates++;
         }
-
-        if (db.db.length >= displayN) {
-            // We cannot append them directly before the above condition is met
-            // because object is not yet inserted in db, and object.div is not
-            // sync with the browser document.
-
-            if (db.db.length % displayN === 0) {
-                // Indexes are not build on first insert, so let's do it now.
-                if (db.db.length === displayN) {
-                    // pagesDB.rebuildIndexes();
-                    displayLot(JSUS.seq(0, displayN - 1));
-                }
-                curLastPage = addPage(curLastPage, displayN);
-            }
-        }
-        
-        // Update header. 'displayed' was already updated, and db + 1 because
-        // this element has not yet been inserted.
-        updateHeader({
-            found: (db.db.length + 1),
-            duplicates: countDuplicates,
-        });
     });
 
     db.on('update', function(o, update) {
@@ -125,10 +120,9 @@ jQuery(document).ready(function(){
     // Init other variables.
 
     // How many results display in the page.
-    displayN = 10;   
+    displayN = 10;
     countDisplayed = 0;
     countDuplicates = 0;
-    currentN = displayN;
     curLastPage = 0;
     // The list of ids (to be sent on every request).
     ids = '';
@@ -152,7 +146,7 @@ jQuery(document).ready(function(){
     prev_results.onclick = function() {
         pageClicked((curDisplayedPage - 1));
     };
-    
+
     pages = document.getElementById('pages');
 
     // Making hidden elements visible.
@@ -202,14 +196,116 @@ jQuery(document).ready(function(){
         }
     });
 
-    function pageClicked(pageId) {        
+    // Elements of the jQuery dialog.
+    dlg = document.getElementById('qsr_dialog-form');
+    dlgAuthors = document.getElementById('qsr_import_paper_authors');
+    dlgAbstract = document.getElementById('qsr_import_paper_abstract');
+    dlgTitle = document.getElementById('qsr_import_paper_title');
+    dlgAuthor1 = document.getElementById('qsr_import_paper_author_1');
+    dlgYear = document.getElementById('qsr_import_paper_year');
+    dlgJournal = document.getElementById('qsr_import_paper_journal');
+    dlgLink = document.getElementById('qsr_import_paper_link');
+    
+
+    // Creating the jQuery dialog.
+    jQuery( "#qsr_dialog-form" ).dialog({
+        autoOpen: false,
+        height: 300,
+        width: 350,
+        modal: true,
+        buttons: {
+            "Import paper": function() {
+                var bValid = true;
+                // allFields.removeClass( "ui-state-error" );
+                if ( bValid ) { 
+                    jQuery( this ).dialog( "close" );
+                }
+            },
+            Cancel: function() {
+                jQuery( this ).dialog( "close" );
+            }
+        },
+        close: function() {
+            // allFields.val( "" ).removeClass( "ui-state-error" );
+        }
+    });
+
+    function addAuthortoPaperBox(idx) {
+        var label, input;
+        input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'qsr_import_paper_author_' + idx;
+        label = document.createElement('label');
+        label['for'] = input.id;
+        dlgAuthors.appendChild(label);
+        dlgAuthors.appendChild(input);
+    }
+
+    function displayAddPaperBox(paper) {
+        var authorCountDiff, i, len;
+        dlgAbstract.value = paper.abstractField || '';
+        dlgTitle.value = paper.title || '';
+        dlgYear.value = paper.year || '';
+        dlgJournal.value = paper.journal || ''; 
+        dlgLink.value = paper.link || ''; 
+        //debugger
+        authorCountDiff = paper.authors.length - (dlgAuthors.children.length / 2);
+        if (authorCountDiff < 0) {            
+            i = authorCountDiff * 2;
+            for ( ; ++i <= 0 ; ) {
+                dlgAuthors.removeChild(dlgAuthors.children[i]);
+            }
+        }
+        else if (authorCountDiff > 0) {
+            i = 1, len = authorCountDiff + 1;
+            for ( ; ++i <= len; ) {
+                addAuthortoPaperBox(i);
+            }
+        }
+        
+        i = 0, len = paper.authors.length;
+        for ( ; ++i <=  len; ) {
+            document.getElementById('qsr_import_paper_author_' + i)
+                .value = paper.authors[i];
+        }
+        
+        jQuery( "#qsr_dialog-form" ).dialog( "open" );    
+
+    }
+
+
+    function displayResults() {
+        if (db.db.length >= displayN) {
+            // We cannot append them directly before the above condition is met
+            // because object is not yet inserted in db, and object.div is not
+            // sync with the browser document.
+
+            if (db.db.length % displayN === 0) {
+                // Indexes are not build on first insert, so let's do it now.
+                if (db.db.length === displayN) {
+                    // pagesDB.rebuildIndexes();
+                    displayLot(JSUS.seq(0, displayN - 1));
+                }
+                curLastPage = addPage(curLastPage, displayN);
+            }
+        }
+
+        // Update header. 'displayed' was already updated, and db + 1 because
+        // this element has not yet been inserted.
+        updateHeader({
+            found: (db.db.length + 1),
+            duplicates: countDuplicates,
+        });
+    }
+
+    function pageClicked(pageId) {
         var lastPage;
 
         next_results.style.display = '';
         prev_results.style.display = '';
 
         if (pageId === 1) {
-            prev_results.style.display = 'none';            
+            prev_results.style.display = 'none';
         }
         else if (pageId === curLastPage) {
             next_results.style.display = 'none';
@@ -221,7 +317,7 @@ jQuery(document).ready(function(){
         lastPage.span.onclick = function() {
             pageClicked(lastPage.page);
         };
-                
+
         // Make the new page non-clickable.
         page = pagesDB.page.get(pageId);
         page.span.className = 'curPage';
@@ -235,10 +331,13 @@ jQuery(document).ready(function(){
 
         // Scroll Up.
         resultDiv.scrollTop = 0;
+        jQuery( resultDiv ).scrollTop();
     }
 
     function addPage(curLastPage, range) {
         var page, newLastPage, ids, from, to;
+        // Making the next_result like visible in any case.
+        next_results.style.display = '';
         // Computing ranges.
         newLastPage = curLastPage + 1;
         from = curLastPage * range;
@@ -271,9 +370,9 @@ jQuery(document).ready(function(){
     function displayLot(ids, only) {
         var i, len, appended;
         only = only || false;
-        
-        // TODO: there might be an overlap between new elements and old 
-        // elements. In this case, we should not remove such elements 
+
+        // TODO: there might be an overlap between new elements and old
+        // elements. In this case, we should not remove such elements
         // and re-add them again.
 
         // Hiding currently displayed elements.
@@ -282,7 +381,7 @@ jQuery(document).ready(function(){
             i = -1, len = appended.length;
             for ( ; ++i < len ; ) {
                 makeResultInvisible(appended[i]);
-            }            
+            }
         }
         // Showing the new elements;
         i = -1, len = ids.length;
@@ -292,9 +391,9 @@ jQuery(document).ready(function(){
     }
 
     function makeResultVisible(o) {
-//        if (o.div.style.display = 'none') {
-//            o.div.style.display = '';
-//        }
+        //        if (o.div.style.display = 'none') {
+        //            o.div.style.display = '';
+        //        }
         if (!o.appended) {
             resultDiv.appendChild(o.div);
             db.idx.update(o.idx, { appended: true });
@@ -306,9 +405,9 @@ jQuery(document).ready(function(){
     }
 
     function makeResultInvisible(o) {
-//        if (o.div.style.display = '') {
-//            o.div.style.display = 'none';
-//        }
+        //        if (o.div.style.display = '') {
+        //            o.div.style.display = 'none';
+        //        }
         if (o.appended) {
             try {
                 resultDiv.removeChild(o.div);
@@ -322,7 +421,7 @@ jQuery(document).ready(function(){
                 log('error', e);
             }
         }
-        
+
     }
 
     function updateHeader(obj) {
@@ -523,8 +622,18 @@ jQuery(document).ready(function(){
         similar.appendChild(duplicatedTextSpan);
 
         // Actions.
-        actions.appendChild(document.createTextNode('ACTIONS!'));
-
+        if (data.friend_url !== MY_INSTANCE) {
+            importPaper = document.createElement('img');
+            importPaper.id = "qsr_action_import_" + idx;
+            importPaper.src = MODULE_PATH + 'images/plus.png';
+            importPaper.alt = "Import paper in local database.";
+            importPaper.title = "Import paper in local database.";
+            importPaper.onclick = function() {
+                displayAddPaperBox(data, idx);
+            }
+            actions.appendChild(importPaper);
+        }
+        // Add all divs to resultDiv.
         div.appendChild(friend);
         div.appendChild(content);
         div.appendChild(actions);
@@ -533,7 +642,7 @@ jQuery(document).ready(function(){
         return div;
     }
 
-// jQuery worker for AJAX requests.
+    // jQuery worker for AJAX requests.
 
     log('info', SEARCH_TYPE + ' search started...');
 
@@ -564,6 +673,7 @@ jQuery(document).ready(function(){
                 len = data.new_results.length;
                 for (i = 0; i < len; i++){
                     db.insert(data.new_results[i]);
+                    displayResults();
                 }
             },
             error: function() {
