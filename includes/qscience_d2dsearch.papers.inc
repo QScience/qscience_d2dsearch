@@ -76,7 +76,7 @@ function _qscience_d2dsearch_import_paper(){
   $node->language = LANGUAGE_NONE;
   $node->field_abstract[$node->language][0] = $abstract;
 
-  node_save($node);
+  // node_save($node);
 
   drupal_json_output(array(
     'success' => true,

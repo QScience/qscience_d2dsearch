@@ -51,8 +51,8 @@ div.qscience_search_result {
     /* min-height: 100px; */
     padding-top: 0;
     margin: 0px;
-    /* border-top: 1px dotted #CCC;
-    background: #FFC2F2; */
+    border-top: 1px dotted #CCC;
+    /* background: #FFC2F2; */
 }
 
 div.my_result {
@@ -314,4 +314,36 @@ div.qscience_search_result_actions img {
     cursor: pointer;
 }
 
+
+/* Dialog */
+
+div#qsr_dialog-form {
+}
+
+div#qsr_dialog-form h1 { 
+    font-size: 1.2em;
+    margin: .6em 0;
+}
+
+div#qsr_dialog-form label { 
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+div#qsr_dialog-form input {
+    width: 95%;
+    display: block;
+    margin-bottom: 15px;
+    padding: .4em;
+}
+
+div#qsr_dialog-form input#qsr_import_paper_year {
+    width: 80px;
+}
+
+div#qsr_dialog-form textarea {
+    height: 150px;
+    width: 98%;
+}
 

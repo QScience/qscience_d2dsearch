@@ -37,25 +37,20 @@ function qscience_d2dsearch_main() {
 
   $addPaperBox = <<<HEREDOC
 <div id="qsr_dialog-form" title="Import paper" style="display: none">
-<p class="validateTips">All form fields are required.</p>
-<form>
-<fieldset>
 <label for="title">Title</label>
 <input type="text" name="qsr_import_paper_title" id="qsr_import_paper_title" class="text ui-widget-content ui-corner-all" />
 <span id="qsr_import_paper_authors">
-<label for="qsr_import_paper_author_1">Author</label>
+<label for="qsr_import_paper_author_1">Author/s</label>
 <input type="text" id="qsr_import_paper_author_1" value="" class="text ui-widget-content ui-corner-all" />
 </span>
 <label for="qsr_import_paper_journal">Journal</label>
-<input type="text" id="qsr_import_paper_journal" />
+<input type="text" id="qsr_import_paper_journal" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_year">Year</label>
-<input type="text" id="qsr_import_paper_year" />
+<input type="text" id="qsr_import_paper_year" maxlength="4" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_link">External Link</label>
-<input type="text" id="qsr_import_paper_link" />
+<input type="text" id="qsr_import_paper_link" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_abstract">Abstract</label>
-<textarea id="qsr_import_paper_abstract"></textarea>
-</fieldset>
-</form>
+<textarea id="qsr_import_paper_abstract" class="text ui-widget-content ui-corner-all"></textarea>
 </div>
 HEREDOC;
 
@@ -127,14 +122,12 @@ function qscience_d2dsearch_form_search() {
     '#collapsed' => TRUE,
   );
 
-  /*
-  $form['advanced']['local_search'] = array(
+  $form['advanced']['no_local_search'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Include local results'),
-    //'#description' => t('Include local results'),
+    '#title' => t('Do not perform local search'),
+    '#description' => t('Duplicates with entries in local database will not be detected.'),
     '#default_value' => 0,
-  );
-  */
+  );  
 
   $form['advanced']['date_container'] = array(
     '#type' => 'container',
@@ -194,6 +187,12 @@ function qscience_d2dsearch_form_search_validate($form, &$form_state) {
 
   $form_state['values']['date_from'] = $fromTS;
   $form_state['values']['date_to'] = $toTS;
+
+  if ($form_state['values']['no_local_search']
+      && $form_state['values']['search_type'] === 'local_only') {
+      form_set_error('no_local_search', 
+                     t('Conflicting options selected. Search aborted.'));
+  }
 }
 
 /**
@@ -216,7 +215,7 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     return;
   }
 
-  switch($form_state['values']['search_type']) {
+  switch ($form_state['values']['search_type']) {
   case 'local_only':
       $friends = array();
       $n_hops = 0;
@@ -234,12 +233,13 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
       $n_hops = NULL;
   }
 
+  $do_local_search = !check_plain($form_state['values']['no_local_search']);
   // Local search always performed.
   $query_id = d2dsearch_query_start('qscience_d2dsearch_papers',
-              $imploded_query,
-              $friends,
-              $n_hops,
-              TRUE
+                                    $imploded_query,
+                                    $friends,
+                                    $n_hops,
+                                    $do_local_search
   );
 
   if (!_d2dsearch_check_query_id($query_id)) {

@@ -210,16 +210,33 @@ jQuery(document).ready(function(){
     // Creating the jQuery dialog.
     jQuery( "#qsr_dialog-form" ).dialog({
         autoOpen: false,
-        height: 300,
-        width: 350,
+        height: 500,
+        width: 600,
         modal: true,
         buttons: {
             "Import paper": function() {
-                var bValid = true;
-                // allFields.removeClass( "ui-state-error" );
-                if ( bValid ) { 
-                    jQuery( this ).dialog( "close" );
-                }
+                
+                jQuery.ajax({
+                    url: '?q=qscience_search/import_paper',
+                    data: { 'query_id': Drupal.settings.query_id, 'ids': ids },
+                    type: 'POST',
+                    success: function(data) {
+                        console.log(data);
+                        log(data.success);
+                        log(data.message);
+                        if (data.success) {
+                            alert('success!');
+                        }
+                        else {
+                            alert('fail: ' + data.message);
+                        }
+                        jQuery( this ).dialog( "close" );
+                    },
+                    error: function() {
+                        // debugger;
+                        alert('generic failure');
+	            }
+                });
             },
             Cancel: function() {
                 jQuery( this ).dialog( "close" );
@@ -243,14 +260,18 @@ jQuery(document).ready(function(){
 
     function displayAddPaperBox(paper) {
         var authorCountDiff, i, len;
+        var paperAuthors, paperInputs;
         dlgAbstract.value = paper.abstractField || '';
         dlgTitle.value = paper.title || '';
         dlgYear.value = paper.year || '';
         dlgJournal.value = paper.journal || ''; 
         dlgLink.value = paper.link || ''; 
-        //debugger
-        authorCountDiff = paper.authors.length - (dlgAuthors.children.length / 2);
-        if (authorCountDiff < 0) {            
+       
+        paperAuthors = paper.authors.length || 1;
+        paperInputs = dlgAuthors.children.length / 2;
+        authorCountDiff = paperAuthors - paperInputs;
+
+        if (authorCountDiff < 0) {           
             i = authorCountDiff * 2;
             for ( ; ++i <= 0 ; ) {
                 dlgAuthors.removeChild(dlgAuthors.children[i]);
@@ -263,10 +284,10 @@ jQuery(document).ready(function(){
             }
         }
         
-        i = 0, len = paper.authors.length;
-        for ( ; ++i <=  len; ) {
-            document.getElementById('qsr_import_paper_author_' + i)
-                .value = paper.authors[i];
+        i = 0, len = paperAuthors;
+        for ( ; i <  len; i++) {
+            document.getElementById('qsr_import_paper_author_' + (i+1))
+                .value = paper.authors[i] || '';
         }
         
         jQuery( "#qsr_dialog-form" ).dialog( "open" );    
@@ -625,7 +646,7 @@ jQuery(document).ready(function(){
         if (data.friend_url !== MY_INSTANCE) {
             importPaper = document.createElement('img');
             importPaper.id = "qsr_action_import_" + idx;
-            importPaper.src = MODULE_PATH + 'images/plus.png';
+            importPaper.src = MODULE_PATH + 'images/add.png';
             importPaper.alt = "Import paper in local database.";
             importPaper.title = "Import paper in local database.";
             importPaper.onclick = function() {
