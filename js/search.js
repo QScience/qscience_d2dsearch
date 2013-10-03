@@ -33,7 +33,9 @@ jQuery(document).ready(function(){
     var importPaper;
     // Input elements of the jQuery dialog.
     var dlg, dlgAuthors, dlgAbstract, dlgTitle, dlgAuthor1, dlgYear;
-    var dlgJournal, dlgLink;
+    var dlgJournal, dlgLink, dlgErrors;
+    // Year (usefule for validation).
+    var YEAR;
 
     // Creating Pages database.
     pagesDB = new NDDB({
@@ -80,12 +82,12 @@ jQuery(document).ready(function(){
 
         // The updated object o contains the id of the div to update.
         //friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
-        friendCountSpan = o.div.childNodes[0].childNodes[1];
+        friendCountSpan = o.div.childNodes[2].childNodes[1];
         if (friendCountSpan) {
             friendCountSpan.innerHTML = '+' + o.similar.length;
             friendCountSpan.style.display = '';
             //parentDiv = document.getElementById('qsr_similar_' + o.idx);
-            parentDiv = o.div.childNodes[3];
+            parentDiv = o.div.childNodes[4];
             parentDiv.appendChild(childDiv);
 
             friendCountSpan.onclick = function() {
@@ -110,12 +112,13 @@ jQuery(document).ready(function(){
 
     // Init constants.
     BASE_PATH = Drupal.settings.basePath;
-    MODULE_PATH = BASE_PATH + Drupal.settings.installFolder + '/';
+    MODULE_PATH = BASE_PATH + Drupal.settings.installFolder;
     MY_INSTANCE = Drupal.settings.my_instance;
     SEARCH_TYPE = Drupal.settings.searchType;
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     MIN_LEV_DIST = 5;
+    YEAR = new Date().getFullYear()
 
     // Init other variables.
 
@@ -198,6 +201,7 @@ jQuery(document).ready(function(){
 
     // Elements of the jQuery dialog.
     dlg = document.getElementById('qsr_dialog-form');
+    dlgErrors = document.getElementById('qsr_dialog-form_errors');
     dlgAuthors = document.getElementById('qsr_import_paper_authors');
     dlgAbstract = document.getElementById('qsr_import_paper_abstract');
     dlgTitle = document.getElementById('qsr_import_paper_title');
@@ -205,7 +209,7 @@ jQuery(document).ready(function(){
     dlgYear = document.getElementById('qsr_import_paper_year');
     dlgJournal = document.getElementById('qsr_import_paper_journal');
     dlgLink = document.getElementById('qsr_import_paper_link');
-    
+
 
     // Creating the jQuery dialog.
     jQuery( "#qsr_dialog-form" ).dialog({
@@ -215,43 +219,119 @@ jQuery(document).ready(function(){
         modal: true,
         buttons: {
             "Import paper": function() {
-                
-                jQuery.ajax({
-                    url: '?q=qscience_search/import_paper',
-                    data: { 'query_id': Drupal.settings.query_id, 'ids': ids },
-                    type: 'POST',
-                    success: function(data) {
-                        console.log(data);
-                        log(data.success);
-                        log(data.message);
-                        if (data.success) {
-                            alert('success!');
+                var paper, i, len, args, valid, authors;
+                valid = true, authors = [];
+                // Clear previous errors.
+                resetDialogErrors()
+                // Validate input.
+                if (dlgYear.value.length !== 4) {
+                    JSUS.sprintf('year must have 4 digits.', null, dlgErrors);
+                    valid = false;
+                }
+                if (isNaN(parseInt(dlgYear.value))) {
+                    JSUS.sprintf('invalid year.', null, dlgErrors);
+                    valid = false;
+                }
+                if (dlgYear.value < 0) {
+                    JSUS.sprintf('year cannot be negative.', null, dlgErrors);
+                    valid = false;
+                }
+                if (dlgTitle.value.trim().length < 3) {
+                    JSUS.sprintf('invalid or missing title.', null, dlgErrors);
+                    valid = false;
+                }
+                if (dlgJournal.value.trim().length < 3) {
+                    JSUS.sprintf('invalid or missing journal.', null, dlgErrors);
+                    valid = false;
+                }
+
+                // Collecting and validating the authors.
+                i = -1, len = dlgAuthors.children.length;
+                for ( ; ++i < len ; ) {
+                    // Skip the label elements.
+                    if (i % 2 === 1) {
+                        author = dlgAuthors.children[i].value.trim();
+                        if (author !== '') {
+                            authors.push(author);
                         }
-                        else {
-                            alert('fail: ' + data.message);
-                        }
-                        jQuery( this ).dialog( "close" );
-                    },
-                    error: function() {
-                        // debugger;
-                        alert('generic failure');
-	            }
-                });
+                    }
+                }
+                if (!authors.length) {
+                    JSUS.sprintf('insert at least one valid author.', null,
+                                 dlgErrors);
+                    valid = false;
+                }
+                else {
+                    dlgErrors.style.display = '';
+                    jQuery(dlg).scrollTop();
+                }
+
+
+                if (valid) {
+                    paper = {};
+                    // Taking the information from the displayed form.
+                    paper.title = dlgTitle.value;
+                    paper.authors = authors;
+                    paper.year = dlgYear.value;
+                    paper.link = dlgLink.value;
+                    paper.journal = dlgJournal.value;
+                    paper.abstractField = dlgAbstract.innerHTML;
+
+                    jQuery.ajax({
+                        url: '?q=qscience_search/import_paper',
+                        data: { 'paper': JSON.stringify(paper) },
+                        type: 'POST',
+                        success: function(data) {
+                            var importButton, idxPaper;
+                            if (data.success) {
+                                log('info', 'paper added to local database');
+                                idxPaper = jQuery("#qsr_dialog-form").data('idxPaper')
+                                importButton = document.getElementById('qsr_action_import_' + idxPaper);
+                                importButton.onclick = null;
+                                importButton.src = MODULE_PATH + 'images/added.png';
+                                importButton.alt = 'Paper already added to local database.';
+                                importButton.title = 'Paper already added to local database.';
+                                alert('success!');
+                                jQuery( "#qsr_dialog-form" ).dialog( "close" );
+                            }
+                            else {
+                                log('error', 'failed to add paper to local database');
+                                alert('fail: ' + data.message);
+                            }
+
+                        },
+                        error: function() {
+                            // debugger;
+                            alert('generic failure');
+	                }
+                    });
+                }
+                else {
+
+                }
             },
             Cancel: function() {
                 jQuery( this ).dialog( "close" );
             }
         },
         close: function() {
-            // allFields.val( "" ).removeClass( "ui-state-error" );
+            resetDialogErrors();
         }
     });
+
+    function resetDialogErrors() {
+        jQuery(dlgErrors).empty();
+        dlgErrors.style.display = 'none';
+        JSUS.sprintf('Submission errors:', null, dlgErrors);
+    }
+
 
     function addAuthortoPaperBox(idx) {
         var label, input;
         input = document.createElement('input');
         input.type = 'text';
         input.id = 'qsr_import_paper_author_' + idx;
+        input.className = "text ui-widget-content ui-corner-all";
         label = document.createElement('label');
         label['for'] = input.id;
         dlgAuthors.appendChild(label);
@@ -264,16 +344,16 @@ jQuery(document).ready(function(){
         dlgAbstract.value = paper.abstractField || '';
         dlgTitle.value = paper.title || '';
         dlgYear.value = paper.year || '';
-        dlgJournal.value = paper.journal || ''; 
-        dlgLink.value = paper.link || ''; 
-       
+        dlgJournal.value = paper.journal || '';
+        dlgLink.value = paper.link || '';
+
         paperAuthors = paper.authors.length || 1;
         paperInputs = dlgAuthors.children.length / 2;
         authorCountDiff = paperAuthors - paperInputs;
 
-        if (authorCountDiff < 0) {           
-            i = authorCountDiff * 2;
-            for ( ; ++i <= 0 ; ) {
+        if (authorCountDiff < 0) {
+            i = Math.abs(authorCountDiff * 2);
+            for ( ; --i < 0 ; ) {
                 dlgAuthors.removeChild(dlgAuthors.children[i]);
             }
         }
@@ -283,14 +363,17 @@ jQuery(document).ready(function(){
                 addAuthortoPaperBox(i);
             }
         }
-        
+
         i = 0, len = paperAuthors;
         for ( ; i <  len; i++) {
             document.getElementById('qsr_import_paper_author_' + (i+1))
                 .value = paper.authors[i] || '';
         }
-        
-        jQuery( "#qsr_dialog-form" ).dialog( "open" );    
+
+
+        jQuery( "#qsr_dialog-form" )
+            .data('idxPaper', paper.idx)
+            .dialog( "open" );
 
     }
 
@@ -499,10 +582,11 @@ jQuery(document).ready(function(){
     }
 
     function createResultDiv(data, idx) {
-        var div, friend, content, actions, similar;
+        var div, iconSide, friend, content, actions, similar;
+        var paperIcon;
         var friendLink, moreFriends, duplicatedTextSpan;
         var title, underTitle, authors, journal, authorsString, abstractField;
-        var abs1, abs2, dots, toggler;
+        var abs1, abs2, dots;
         var sameDiv, sameFriend, sameFriendSpan;
         var i, len;
 
@@ -515,6 +599,9 @@ jQuery(document).ready(function(){
         div.className = 'qscience_search_result';
 
         // Creating all divs;
+        iconSide = document.createElement('span');
+        iconSide.className = 'qscience_search_result_iconside';
+        iconSide.id = 'qsr_iconside_' + idx;
 
         friend = document.createElement('div');
         friend.className = 'qscience_search_result_friend';
@@ -532,6 +619,12 @@ jQuery(document).ready(function(){
         similar.style.display = 'none';
 
         // Adding content to each div.
+
+        // IconSide.
+        paperIcon = document.createElement('img');
+        paperIcon.id = 'qsr_papericon_' + idx;
+        paperIcon.src = MODULE_PATH + 'images/paper2.png';
+        iconSide.appendChild(paperIcon);
 
         // Friend.
         if (data.friend_url === MY_INSTANCE) {
@@ -599,9 +692,6 @@ jQuery(document).ready(function(){
 
         // Display only first part of the abstract if it is too long.
         if (data.abstractField.length > ABS_MAX_LENGTH) {
-            //toggler = document.createElement('img');
-            //toggler.id = 'toggler_' + idx;
-            //toggler.src = MODULE_PATH + 'images/plus.png';
 
             abs1 = document.createElement('span');
             abs1.appendChild(document.createTextNode(
@@ -625,7 +715,6 @@ jQuery(document).ready(function(){
             abstractField.appendChild(abs1);
             abstractField.appendChild(abs2);
             abstractField.appendChild(dots);
-            // abstractField.appendChild(toggler);
         }
         else {
             abstractField.appendChild(document.createTextNode(data.abstractField));
@@ -633,7 +722,9 @@ jQuery(document).ready(function(){
 
         // Adding title, underTitle, and abstract to main content div.
         content.appendChild(title);
+        content.appendChild(document.createElement('br'));
         content.appendChild(underTitle);
+        content.appendChild(document.createElement('br'))
         content.appendChild(abstractField);
 
         // Similar.
@@ -655,9 +746,11 @@ jQuery(document).ready(function(){
             actions.appendChild(importPaper);
         }
         // Add all divs to resultDiv.
+        div.appendChild(iconSide);
+
+        div.appendChild(actions);
         div.appendChild(friend);
         div.appendChild(content);
-        div.appendChild(actions);
         div.appendChild(similar);
 
         return div;

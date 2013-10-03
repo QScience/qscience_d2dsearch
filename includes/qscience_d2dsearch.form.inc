@@ -11,7 +11,6 @@ define('QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH', 64);
  * Menu callback; builds the search page.
  */
 function qscience_d2dsearch_main() {
-  $a = node_load(7);
   drupal_add_css(drupal_get_path('module', 'qscience_d2dsearch') . '/css/qscience_d2dsearch.css');
 
   $build['main'] = array(
@@ -25,8 +24,7 @@ function qscience_d2dsearch_main() {
     drupal_set_message(t('QScience Search disabled.'), 'warning');
     $build['main']['disabled'] = array(
       '#prefix' => t('<strong>Warning! Search disabled</strong>.</br><div id="discoverd2d">'),
-      '#markup' => t('<span "whatsup">What\'s up bro?! You have no friends!</span> Explore the QScience network, and find relevant communities and new QScience instances in the <a href="@d2dserver" target="_blank">D2D Server</a>.',
-                 array('@d2dserver' => url('http://d2dplace.inn.ac'))),
+      '#markup' => t('<span "whatsup">You have no friends :(</span> Explore the QScience network, and find relevant communities and new QScience instances in the <a href="@d2dserver" target="_blank">D2D Server</a>.', array('@d2dserver' => url('http://d2dplace.inn.ac'))),
       '#suffix' => '</div>',
     );
 
@@ -37,6 +35,7 @@ function qscience_d2dsearch_main() {
 
   $addPaperBox = <<<HEREDOC
 <div id="qsr_dialog-form" title="Import paper" style="display: none">
+<span id="qsr_dialog-form_errors" style="display: none"></span>
 <label for="title">Title</label>
 <input type="text" name="qsr_import_paper_title" id="qsr_import_paper_title" class="text ui-widget-content ui-corner-all" />
 <span id="qsr_import_paper_authors">
@@ -45,7 +44,7 @@ function qscience_d2dsearch_main() {
 </span>
 <label for="qsr_import_paper_journal">Journal</label>
 <input type="text" id="qsr_import_paper_journal" class="text ui-widget-content ui-corner-all"/>
-<label for="qsr_import_paper_year">Year</label>
+<label for="qsr_import_paper_year">Year (4 digits)</label>
 <input type="text" id="qsr_import_paper_year" maxlength="4" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_link">External Link</label>
 <input type="text" id="qsr_import_paper_link" class="text ui-widget-content ui-corner-all"/>
@@ -56,7 +55,7 @@ HEREDOC;
 
   $build['results'] = array(
     '#prefix' => $addPaperBox,
-    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Search started...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found"></span><span id="qsr_duplicates"></span><span id="qsr_displayed"></span></div><div id="qscience_d2dsearch_results"></div>',
+    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Search started...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found">Found: 0</span><span id="qsr_duplicates">Duplicates: 0</span><span id="qsr_displayed">Displayed: 0</span></div><div id="qscience_d2dsearch_results"></div>',
     '#suffix' => '<div id="paginator" style="display: none"><span id="prev_results" style="display: none"><<</span><span id="pages"></span><span style="display: none" id="next_results">>></span></div>',
   );
 
@@ -127,7 +126,7 @@ function qscience_d2dsearch_form_search() {
     '#title' => t('Do not perform local search'),
     '#description' => t('Duplicates with entries in local database will not be detected.'),
     '#default_value' => 0,
-  );  
+  );
 
   $form['advanced']['date_container'] = array(
     '#type' => 'container',
@@ -190,7 +189,7 @@ function qscience_d2dsearch_form_search_validate($form, &$form_state) {
 
   if ($form_state['values']['no_local_search']
       && $form_state['values']['search_type'] === 'local_only') {
-      form_set_error('no_local_search', 
+      form_set_error('no_local_search',
                      t('Conflicting options selected. Search aborted.'));
   }
 }

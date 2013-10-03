@@ -10,10 +10,21 @@
  * Menu callback; imports a paper into local database.
  */
 function _qscience_d2dsearch_import_paper(){
+  global $user;
+
+  if (!isset($_POST['paper'])) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'Missing data.',
+    ));
+    return;
+  }
+  $paper = drupal_json_decode($_POST['paper']);
+
   // Title.
   $title = NULL;
-  if (isset($_POST['title'])) {
-    $title = check_plain($_POST['title']);
+  if (isset($paper['title'])) {
+    $title = check_plain($paper['title']);
   }
   if (empty($title)) {
     drupal_json_output(array(
@@ -24,8 +35,8 @@ function _qscience_d2dsearch_import_paper(){
   }
   // Authors.
   $authors = array();
-  if (isset($_POST['authors'])) {
-    foreach($authors as $a) {
+  if (isset($paper['authors'])) {
+    foreach($paper['authors'] as $a) {
       if (check_plain($a)) {
         array_push($authors, $a);
       }
@@ -40,8 +51,8 @@ function _qscience_d2dsearch_import_paper(){
   }
   // Journal.
   $journal = NULL;
-  if (isset($_POST['journal'])) {
-    $journal = check_plain($_POST['journal']);
+  if (isset($paper['journal'])) {
+    $journal = check_plain($paper['journal']);
   }
   if (empty($journal)) {
     drupal_json_output(array(
@@ -52,8 +63,8 @@ function _qscience_d2dsearch_import_paper(){
   }
   // Year.
   $year = NULL;
-  if (isset($_POST['year'])) {
-    $year = check_plain($_POST['year']);
+  if (isset($paper['year'])) {
+    $year = check_plain($paper['year']);
   }
   if (empty($year)) {
     drupal_json_output(array(
@@ -64,11 +75,19 @@ function _qscience_d2dsearch_import_paper(){
   }
    // Abstract (can be missing, must be sanitized).
   $abstract = NULL;
-  if (isset($_POST['abstract'])) {
-    $abstract = check_plain($_POST['abstract']);
+  if (isset($paper['abstract'])) {
+    $abstract = check_plain($paper['abstract']);
   }
 
+  // Creating the Authors entities.
 
+  foreach($authors as $a) {
+    $entity = entity_create('node', array('type' => 'author'));
+    $wrapper = entity_metadata_wrapper('node', $entity);
+    $wrapper->title = $a;
+    $wrapper->save();
+  }
+  
   $node = new stdClass();
   $node->type = 'paper';
   node_object_prepare($node);
@@ -80,7 +99,7 @@ function _qscience_d2dsearch_import_paper(){
 
   drupal_json_output(array(
     'success' => true,
-    'message' => 'New image node content is created',
+    'message' => 'Paper added to database.',
   ));
 }
 

@@ -115,18 +115,29 @@ JSUS.addAttributes2Elem = function (e, a) {
  * @param {Element} root Optional. An HTML element to which append the string. Defaults, a new _span_ element
  *
  */
-JSUS.sprintf = function (string, args, root) {
+JSUS.sprintf = function(string, args, root) {
 
-    var text, textNode, span, idx_start, idx_finish, idx_replace, idxs, spans = {};
+    var text, textNode, span, idx_start, idx_finish, idx_replace, idxs;
+    var tmp, spans, key, i;
 
+    // If no formatting arguments are provided, just create a string
+    // and inserted into a span tag. If a root element is provided, add it.
     if (!args) {
-	return document.createTextNode(string);
+        tmp = document.createElement('span');
+        tmp.appendChild(document.createTextNode(string));
+        if (!root) {
+            return tmp;
+        }
+        else {
+            return root.appendChild(tmp);
+        }
     }
 
     root = root || document.createElement('span');
+    spans = {};
 
     // Transform arguments before inserting them.
-    for (var key in args) {
+    for (key in args) {
 	if (args.hasOwnProperty(key)) {
 
 	    // pattern not found
@@ -164,16 +175,16 @@ JSUS.sprintf = function (string, args, root) {
 	}
     }
 
-    // No span to creates
+    // No span to creates.
     if (!JSUS.size(spans)) {
 	return document.createTextNode(string);
     }
 
-    // Re-assamble the string
+    // Re-assamble the string.
 
-    idxs = JSUS.keys(spans).sort(function(a,b){return a-b;});
+    idxs = JSUS.keys(spans).sort(function(a, b){ return a - b; });
     idx_finish = 0;
-    for (var i = 0; i < idxs.length; i++) {
+    for (i = 0; i < idxs.length; i++) {
 
 	// add span
 	key = spans[idxs[i]];

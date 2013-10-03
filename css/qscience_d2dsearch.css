@@ -49,9 +49,10 @@ div.qscience_search_result {
     clear: both;
     height: 100%;
     /* min-height: 100px; */
-    padding-top: 0;
-    margin: 0px;
-    border-top: 1px dotted #CCC;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+    border-bottom: 1px dotted #CCC;
     /* background: #FFC2F2; */
 }
 
@@ -73,11 +74,14 @@ div.qscience_search_result div {
 }
 
 div.qscience_search_result_friend {
-    clear: both;
+    /* clear: both; */
     font-weight: bold;
     /* border-bottom: 1px dotted #CCC; */
     color: #4186D3;
-    padding: 1px 3px 1px 3px;
+    margin-top: 10px;
+    padding-left: 10px;
+    display: inline;
+    vertical-align: top;
     /*background: #689AD3; */
 }
 
@@ -88,7 +92,7 @@ div.qscience_search_result_content {
 span.qsr_underTitle {
     margin-top: 1px;
     margin-bottom: 5px;
-    float: left;
+    /* float: left; */
     clear: both;
     color: #2A1003;
 }
@@ -104,12 +108,14 @@ span.qsr_journal {
 span.qscience_search_result_title {
     font-weight: bold;
     font-size: 14px;
-    float: left;
-    clear: both;
+    /* float: left; */
+    /* clear: both; */
+    display: inline;
+    margin-bottom: 5px;
 }
 
 span.qscience_search_result_abstract {
-    float: left;
+    /* float: left; */
     clear: both;
     font-weight: normal;
 }
@@ -249,6 +255,8 @@ div#qscience_d2dsearch_results_header {
     clear: both;
     font-weight: bold;
     padding: 3px;
+    border-bottom: 1px solid #CCC;
+    margin-bottom: 10px;
 }
 
 div#qscience_d2dsearch_results_header span {
@@ -297,14 +305,36 @@ span#prev_results:hover, span#next_results:hover {
 }
 
 
+/* IconSide */
+
+div.qscience_search_result_iconside {
+    /*
+      float: left;
+      height: 100%;
+      */
+    display: inline;
+}
+
+div.qscience_search_result_iconside img {
+
+}
+
+/* contentSide */
+
+div.qscience_search_result_contentside {
+    /* float: left; */
+}
+
+
 /* Actions */
 
 div.qscience_search_result_actions {
-    width: 100%;
-    float: left;
+    float: right;
     text-align: right;
-    clear: both;
-    /* border-bottom: 1px solid #CCC;
+
+    /*
+       clear: both;
+       border-bottom: 1px solid #CCC;
      border-bottom: 1px solid #CCC; */
     /* background: #EFF8FC; */
     height: 20px;
@@ -320,12 +350,12 @@ div.qscience_search_result_actions img {
 div#qsr_dialog-form {
 }
 
-div#qsr_dialog-form h1 { 
+div#qsr_dialog-form h1 {
     font-size: 1.2em;
     margin: .6em 0;
 }
 
-div#qsr_dialog-form label { 
+div#qsr_dialog-form label {
     display: block;
     font-size: 12px;
     font-weight: bold;
@@ -347,3 +377,17 @@ div#qsr_dialog-form textarea {
     width: 98%;
 }
 
+span#qsr_dialog-form_errors span {
+    display: block;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    color: red;
+}
+
+span#qsr_dialog-form_errors span:first-child {
+    display: block;
+    margin-bottom: 10px;
+    margin-left: 0;
+    color: red;
+    font-weight: bold;
+}
