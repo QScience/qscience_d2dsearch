@@ -40,10 +40,10 @@ function qscience_d2dsearch_main() {
 <input type="text" name="qsr_import_paper_title" id="qsr_import_paper_title" class="text ui-widget-content ui-corner-all" />
 <span id="qsr_import_paper_authors">
 <label for="qsr_import_paper_author_1">Author/s</label>
-<input type="text" id="qsr_import_paper_author_1" value="" class="text ui-widget-content ui-corner-all" />
+<input type="text" name= "" id="qsr_import_paper_author_1" value="" class="text ui-widget-content ui-corner-all" />
 </span>
 <label for="qsr_import_paper_journal">Journal</label>
-<input type="text" id="qsr_import_paper_journal" class="text ui-widget-content ui-corner-all"/>
+<input type="text" name="" id="qsr_import_paper_journal" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_year">Year (4 digits)</label>
 <input type="text" id="qsr_import_paper_year" maxlength="4" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_link">External Link</label>
@@ -55,7 +55,7 @@ HEREDOC;
 
   $build['results'] = array(
     '#prefix' => $addPaperBox,
-    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Search started...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header"><span id="qsr_found">Found: 0</span><span id="qsr_duplicates">Duplicates: 0</span><span id="qsr_displayed">Displayed: 0</span></div><div id="qscience_d2dsearch_results"></div>',
+    '#markup' => '<div id="progressbar" style="display: none"><div class="progress-label">Search started...</div></div><div id="console" style="display: none"></div><span id="hideconsole" style="display: none"> >>hide console</span><div id="qscience_d2dsearch_results_header" style="display: none"><span id="qsr_found">Found: 0</span><span id="qsr_duplicates">Duplicates: 0</span><span id="qsr_displayed">Displayed: 0</span></div><div id="qscience_d2dsearch_results"></div>',
     '#suffix' => '<div id="paginator" style="display: none"><span id="prev_results" style="display: none"><<</span><span id="pages"></span><span style="display: none" id="next_results">>></span></div>',
   );
 
@@ -251,12 +251,15 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     $my_instance = d2d_api_own_instance_get();
     $my_url = substr($my_instance['url'], 0,
                      strpos($my_instance['url'], 'xmlrpc.php'));
+    
     drupal_add_library('system', 'ui.progressbar');
+    drupal_add_library('system', 'ui.autocomplete');
     drupal_add_js(array(
       'query_id' => $query_id,
       'installFolder' => $installFolder,
       'my_instance' => $my_url,
       'searchType' => $form_state['values']['search_type'],
+      'clean_url' => variable_get('clean_url', 0),
     ), 'setting');
     drupal_add_js($path . '/js/levenshtein.js');
     drupal_add_js($path . '/js/nddb-full.js');

@@ -36,6 +36,8 @@ jQuery(document).ready(function(){
     var dlgJournal, dlgLink, dlgErrors;
     // Year (usefule for validation).
     var YEAR;
+    // Clean Url, module url.
+    var CLEAN_URL, MODULE_URL;
 
     // Creating Pages database.
     pagesDB = new NDDB({
@@ -79,6 +81,10 @@ jQuery(document).ready(function(){
         update.similar = o.similar;
         childDiv = update.div;
         delete update.div;
+        
+        if (o.title === 'Flache A (2002) Learning dynamics in social dilemmas.') {
+            //debugger;
+        }
 
         // The updated object o contains the id of the div to update.
         //friendCountSpan = document.getElementById('qsr_friend_more_' + o.idx);
@@ -115,6 +121,8 @@ jQuery(document).ready(function(){
     MODULE_PATH = BASE_PATH + Drupal.settings.installFolder;
     MY_INSTANCE = Drupal.settings.my_instance;
     SEARCH_TYPE = Drupal.settings.searchType;
+    CLEAN_URL = Drupal.settings.clean_url === "1";
+    MODULE_URL = BASE_PATH  + (CLEAN_URL ? '' : '?q=') + 'qscience_search/';
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     MIN_LEV_DIST = 5;
@@ -123,7 +131,7 @@ jQuery(document).ready(function(){
     // Init other variables.
 
     // How many results display in the page.
-    displayN = 10;
+    displayN = 100;
     countDisplayed = 0;
     countDuplicates = 0;
     curLastPage = 0;
@@ -158,6 +166,8 @@ jQuery(document).ready(function(){
 
     hideconsole = document.getElementById('hideconsole');
     hideconsole.style.display = '';
+
+    header.style.display = '';
 
     hideconsole.onclick = function() {
         if (myConsole.style.height === '0px') {
@@ -210,6 +220,51 @@ jQuery(document).ready(function(){
     dlgJournal = document.getElementById('qsr_import_paper_journal');
     dlgLink = document.getElementById('qsr_import_paper_link');
 
+
+    // Autocomplete in jQuery dialog
+    function split( val ) {
+        return val.split( /,\s*/ );
+    }
+    function extractLast( term ) {
+        return split( term ).pop();
+    }
+    jQuery( "#qsr_import_paper_authors" )
+    // don't navigate away from the field on tab when selecting an item
+        .bind( "keydown", function( event ) {
+            if ( event.keyCode === jQuery.ui.keyCode.TAB &&
+                 jQuery( this ).data( "ui-autocomplete" ).menu.active ) {
+                event.preventDefault();
+            }
+        })
+        .autocomplete({
+            source: function( request, response ) {
+                jQuery.getJSON( "qscience_search/autocomplete_author", {
+                    term: extractLast( request.term )
+                }, response );
+            },
+            search: function() {
+                // custom minLength
+                var term = extractLast( this.value );
+                if ( term.length < 2 ) {
+                    return false;
+                }
+            },
+            focus: function() {
+                // prevent value inserted on focus
+                return false;
+            },
+            select: function( event, ui ) {
+                var terms = split( this.value );
+                // remove the current input
+                terms.pop();
+                // add the selected item
+                terms.push( ui.item.value );
+                // add placeholder to get the comma-and-space at the end
+                terms.push( "" );
+                this.value = terms.join( ", " );
+                return false;
+            }
+        });
 
     // Creating the jQuery dialog.
     jQuery( "#qsr_dialog-form" ).dialog({
@@ -278,7 +333,7 @@ jQuery(document).ready(function(){
                     paper.abstractField = dlgAbstract.innerHTML;
 
                     jQuery.ajax({
-                        url: '?q=qscience_search/import_paper',
+                        url: MODULE_URL + 'import_paper',
                         data: { 'paper': JSON.stringify(paper) },
                         type: 'POST',
                         success: function(data) {
@@ -495,9 +550,6 @@ jQuery(document).ready(function(){
     }
 
     function makeResultVisible(o) {
-        //        if (o.div.style.display = 'none') {
-        //            o.div.style.display = '';
-        //        }
         if (!o.appended) {
             resultDiv.appendChild(o.div);
             db.idx.update(o.idx, { appended: true });
@@ -509,9 +561,6 @@ jQuery(document).ready(function(){
     }
 
     function makeResultInvisible(o) {
-        //        if (o.div.style.display = '') {
-        //            o.div.style.display = 'none';
-        //        }
         if (o.appended) {
             try {
                 resultDiv.removeChild(o.div);
@@ -762,7 +811,7 @@ jQuery(document).ready(function(){
 
     function worker() {
         jQuery.ajax({
-            url: '?q=qscience_search/get_result',
+            url: MODULE_URL + 'get_result',
             data: { 'query_id': Drupal.settings.query_id, 'ids': ids },
             type: 'POST',
             success: function(data) {
