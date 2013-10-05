@@ -34,6 +34,8 @@ jQuery(document).ready(function(){
     // Input elements of the jQuery dialog.
     var dlg, dlgAuthors, dlgAbstract, dlgTitle, dlgAuthor1, dlgYear;
     var dlgJournal, dlgLink, dlgErrors;
+    // The jQuery input box for authors in the dialog.
+    var authorTokenInput;
     // Year (usefule for validation).
     var YEAR;
     // Clean Url, module url.
@@ -228,7 +230,7 @@ jQuery(document).ready(function(){
         return split( term ).pop();
     }
 
-    jQuery("#qsr_import_paper_author_1").tokenInput(
+    authorTokenInput = jQuery("#qsr_import_paper_author_1").tokenInput(
         MODULE_URL + 'autocomplete_author', {
             queryParam: 'term',
             //searchDelay: 2000,
@@ -249,54 +251,6 @@ jQuery(document).ready(function(){
             }
         }
     );
-
-//    jQuery( "#qsr_import_paper_author_1" )
-//    // don't navigate away from the field on tab when selecting an item
-//        .bind( "keydown", function( event ) {
-//            if ( event.keyCode === jQuery.ui.keyCode.TAB &&
-//                 jQuery( this ).data( "ui-autocomplete" ).menu.active ) {
-//                event.preventDefault();
-//            }
-//        })
-//        .autocomplete({
-//            source: function( request, response ) {
-//                // delegate back to autocomplete, but extract the last term
-//                jQuery.getJSON( MODULE_URL + 'autocomplete_author', {
-//                    term: extractLast( request.term )
-//                }, function(data, txtStatus, jqXHR) {
-//                    //debugger;
-//                    var titles = [];
-//                    for (var i = 0; i < data.length; i++) {
-//                        titles.push(data[i].title);
-//                    }
-//                    response(titles);
-//                    //response(data[0].title);
-//                });
-//            },
-//            search: function() {
-//                // custom minLength
-//                var term = extractLast( this.value );
-//                if ( term.length < 2 ) {
-//                    return false;
-//                }
-//            },
-//            focus: function() {
-//                // prevent value inserted on focus
-//                return false;
-//            },
-//            select: function( event, ui ) {
-//                // debugger
-//                var terms = split( this.value );
-//                // remove the current input
-//                terms.pop();
-//                // add the selected item
-//                terms.push( ui.item.value );
-//                // add placeholder to get the comma-and-space at the end
-//                terms.push( "" );
-//                this.value = terms.join( ", " );
-//                return false;
-//            }
-//        });
 
     // Creating the jQuery dialog.
     jQuery( "#qsr_dialog-form" ).dialog({
@@ -332,17 +286,8 @@ jQuery(document).ready(function(){
                     valid = false;
                 }
 
-                // Collecting and validating the authors.
-                i = -1, len = dlgAuthors.children.length;
-                for ( ; ++i < len ; ) {
-                    // Skip the label elements.
-                    if (i % 2 === 1) {
-                        author = dlgAuthors.children[i].value.trim();
-                        if (author !== '') {
-                            authors.push(author);
-                        }
-                    }
-                }
+                authors = authorsTokenInput('get');
+
                 if (!authors.length) {
                     JSUS.sprintf('insert at least one valid author.', null,
                                  dlgErrors);
@@ -434,29 +379,13 @@ jQuery(document).ready(function(){
         dlgJournal.value = paper.journal || '';
         dlgLink.value = paper.link || '';
 
-//        paperAuthors = paper.authors.length || 1;
-//        paperInputs = dlgAuthors.children.length / 2;
-//        authorCountDiff = paperAuthors - paperInputs;
-//
-//        if (authorCountDiff < 0) {
-//            i = Math.abs(authorCountDiff * 2);
-//            for ( ; --i < 0 ; ) {
-//                dlgAuthors.removeChild(dlgAuthors.children[i]);
-//            }
+        // Clear last selection.
+        authorTokenInput.tokenInput('clear');
+        // Populate with authors
+//        i = -1, len = paper.authors.length;
+//        for ( ; ++i < len ; ) {
+//            authorTokenInput("add", {id: , name: y});
 //        }
-//        else if (authorCountDiff > 0) {
-//            i = 1, len = authorCountDiff + 1;
-//            for ( ; ++i <= len; ) {
-//                addAuthortoPaperBox(i);
-//            }
-//        }
-
-//        i = 0, len = paperAuthors;
-//        for ( ; i <  len; i++) {
-//            document.getElementById('qsr_import_paper_author_' + (i+1))
-//                .value = paper.authors[i] || '';
-//        }
-
 
         jQuery( "#qsr_dialog-form" )
             .data('idxPaper', paper.idx)
