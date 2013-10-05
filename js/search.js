@@ -81,7 +81,7 @@ jQuery(document).ready(function(){
         update.similar = o.similar;
         childDiv = update.div;
         delete update.div;
-        
+
         if (o.title === 'Flache A (2002) Learning dynamics in social dilemmas.') {
             //debugger;
         }
@@ -220,7 +220,6 @@ jQuery(document).ready(function(){
     dlgJournal = document.getElementById('qsr_import_paper_journal');
     dlgLink = document.getElementById('qsr_import_paper_link');
 
-
     // Autocomplete in jQuery dialog
     function split( val ) {
         return val.split( /,\s*/ );
@@ -228,43 +227,76 @@ jQuery(document).ready(function(){
     function extractLast( term ) {
         return split( term ).pop();
     }
-    jQuery( "#qsr_import_paper_authors" )
-    // don't navigate away from the field on tab when selecting an item
-        .bind( "keydown", function( event ) {
-            if ( event.keyCode === jQuery.ui.keyCode.TAB &&
-                 jQuery( this ).data( "ui-autocomplete" ).menu.active ) {
-                event.preventDefault();
-            }
-        })
-        .autocomplete({
-            source: function( request, response ) {
-                jQuery.getJSON( "qscience_search/autocomplete_author", {
-                    term: extractLast( request.term )
-                }, response );
-            },
-            search: function() {
-                // custom minLength
-                var term = extractLast( this.value );
-                if ( term.length < 2 ) {
-                    return false;
+
+    aa = jQuery("#qsr_import_paper_author_1").tokenInput(
+        MODULE_URL + 'autocomplete_author', {
+            queryParam: 'term',
+            //searchDelay: 2000,
+            //minChars: 4,
+            preventDuplicates: true,
+            hintText: "Type something to start autocomplete",
+            noResultsText: "No results :(",
+            searchingText: "Searching...",
+            onResult: function(data) {
+                //debugger;
+                return (data);
+
+                var titles = [];
+                for (var i = 0; i < data.length; i++) {
+                    titles.push(data[i].title);
                 }
-            },
-            focus: function() {
-                // prevent value inserted on focus
-                return false;
-            },
-            select: function( event, ui ) {
-                var terms = split( this.value );
-                // remove the current input
-                terms.pop();
-                // add the selected item
-                terms.push( ui.item.value );
-                // add placeholder to get the comma-and-space at the end
-                terms.push( "" );
-                this.value = terms.join( ", " );
-                return false;
+                return (titles);
             }
-        });
+        }
+    );
+
+//    jQuery( "#qsr_import_paper_author_1" )
+//    // don't navigate away from the field on tab when selecting an item
+//        .bind( "keydown", function( event ) {
+//            if ( event.keyCode === jQuery.ui.keyCode.TAB &&
+//                 jQuery( this ).data( "ui-autocomplete" ).menu.active ) {
+//                event.preventDefault();
+//            }
+//        })
+//        .autocomplete({
+//            source: function( request, response ) {
+//                // delegate back to autocomplete, but extract the last term
+//                jQuery.getJSON( MODULE_URL + 'autocomplete_author', {
+//                    term: extractLast( request.term )
+//                }, function(data, txtStatus, jqXHR) {
+//                    //debugger;
+//                    var titles = [];
+//                    for (var i = 0; i < data.length; i++) {
+//                        titles.push(data[i].title);
+//                    }
+//                    response(titles);
+//                    //response(data[0].title);
+//                });
+//            },
+//            search: function() {
+//                // custom minLength
+//                var term = extractLast( this.value );
+//                if ( term.length < 2 ) {
+//                    return false;
+//                }
+//            },
+//            focus: function() {
+//                // prevent value inserted on focus
+//                return false;
+//            },
+//            select: function( event, ui ) {
+//                // debugger
+//                var terms = split( this.value );
+//                // remove the current input
+//                terms.pop();
+//                // add the selected item
+//                terms.push( ui.item.value );
+//                // add placeholder to get the comma-and-space at the end
+//                terms.push( "" );
+//                this.value = terms.join( ", " );
+//                return false;
+//            }
+//        });
 
     // Creating the jQuery dialog.
     jQuery( "#qsr_dialog-form" ).dialog({
@@ -402,28 +434,28 @@ jQuery(document).ready(function(){
         dlgJournal.value = paper.journal || '';
         dlgLink.value = paper.link || '';
 
-        paperAuthors = paper.authors.length || 1;
-        paperInputs = dlgAuthors.children.length / 2;
-        authorCountDiff = paperAuthors - paperInputs;
+//        paperAuthors = paper.authors.length || 1;
+//        paperInputs = dlgAuthors.children.length / 2;
+//        authorCountDiff = paperAuthors - paperInputs;
+//
+//        if (authorCountDiff < 0) {
+//            i = Math.abs(authorCountDiff * 2);
+//            for ( ; --i < 0 ; ) {
+//                dlgAuthors.removeChild(dlgAuthors.children[i]);
+//            }
+//        }
+//        else if (authorCountDiff > 0) {
+//            i = 1, len = authorCountDiff + 1;
+//            for ( ; ++i <= len; ) {
+//                addAuthortoPaperBox(i);
+//            }
+//        }
 
-        if (authorCountDiff < 0) {
-            i = Math.abs(authorCountDiff * 2);
-            for ( ; --i < 0 ; ) {
-                dlgAuthors.removeChild(dlgAuthors.children[i]);
-            }
-        }
-        else if (authorCountDiff > 0) {
-            i = 1, len = authorCountDiff + 1;
-            for ( ; ++i <= len; ) {
-                addAuthortoPaperBox(i);
-            }
-        }
-
-        i = 0, len = paperAuthors;
-        for ( ; i <  len; i++) {
-            document.getElementById('qsr_import_paper_author_' + (i+1))
-                .value = paper.authors[i] || '';
-        }
+//        i = 0, len = paperAuthors;
+//        for ( ; i <  len; i++) {
+//            document.getElementById('qsr_import_paper_author_' + (i+1))
+//                .value = paper.authors[i] || '';
+//        }
 
 
         jQuery( "#qsr_dialog-form" )

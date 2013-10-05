@@ -24,10 +24,9 @@ function qscience_d2dsearch_main() {
     drupal_set_message(t('QScience Search disabled.'), 'warning');
     $build['main']['disabled'] = array(
       '#prefix' => t('<strong>Warning! Search disabled</strong>.</br><div id="discoverd2d">'),
-      '#markup' => t('<span "whatsup">You have no friends :(</span> Explore the QScience network, and find relevant communities and new QScience instances in the <a href="@d2dserver" target="_blank">D2D Server</a>.', array('@d2dserver' => url('http://d2dplace.inn.ac'))),
+      '#markup' => t('<span "whatsup">You have no friends :(</span> Explore the QScience network, and find relevant communities and new QScience instances in the <a href="@d2dserver" target="_blank">D2D Server</a>.', array('@d2dserver' => url('http://d2d.inn.ac'))),
       '#suffix' => '</div>',
     );
-
     return $build;
   }
 
@@ -264,6 +263,10 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     drupal_add_js($path . '/js/levenshtein.js');
     drupal_add_js($path . '/js/nddb-full.js');
     drupal_add_js($path . '/js/sprintf.js');
+    // Token-input library.
+    drupal_add_css($path . '/css/token-input.css');
+    drupal_add_js($path . '/js/jquery.tokeninput.js');
+    // The search script.
     drupal_add_js($path . '/js/search.js');
   }
 }

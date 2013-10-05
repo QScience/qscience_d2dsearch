@@ -2,11 +2,13 @@
 
 /**
  * @file
- * D2D Search module.
+ * QScience D2D Search module.
  */
 
 require_once 'includes/qscience_d2dsearch.form.inc';
 require_once 'includes/qscience_d2dsearch.papers.inc';
+require_once 'includes/qscience_d2dsearch.suggest.inc';
+
 
 /**
  * Implements hook_menu_alter().
