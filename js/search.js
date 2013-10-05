@@ -228,7 +228,7 @@ jQuery(document).ready(function(){
         return split( term ).pop();
     }
 
-    aa = jQuery("#qsr_import_paper_author_1").tokenInput(
+    jQuery("#qsr_import_paper_author_1").tokenInput(
         MODULE_URL + 'autocomplete_author', {
             queryParam: 'term',
             //searchDelay: 2000,
