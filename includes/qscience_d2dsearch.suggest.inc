@@ -68,7 +68,7 @@ function _qscience_d2dsearch_suggest_journal(){
   $query->condition('n.type', 'journal');
   $query->condition('n.title', '%' . db_like($journal) . '%', 'LIKE');
 
-  $journal = $query->execute()->FetchAll();
+  $journals = $query->execute()->FetchAll();
   drupal_json_output($journals);
 }
 

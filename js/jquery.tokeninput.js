@@ -42,9 +42,15 @@ var DEFAULT_SETTINGS = {
 	// Manipulation settings
     idPrefix: "token-input-",
 
-	// Formatters
-    resultsFormatter: function(item){ return "<li>" + item[this.propertyToSearch]+ "</li>" },
-    tokenFormatter: function(item) { return "<li><p>" + item[this.propertyToSearch] + "</p></li>" },
+    // Formatters
+    resultsFormatter: function(item) {
+        if (!item) return;
+        return "<li>" + item[this.propertyToSearch]+ "</li>";
+    },
+    tokenFormatter: function(item) {
+        if (!item) return;
+        return "<li><p>" + item[this.propertyToSearch] + "</p></li>";
+    },
 
 	// Callbacks
     onResult: null,
@@ -461,6 +467,7 @@ $.TokenList = function (input, url_or_data, settings) {
 
     // Inner function to a token to the list
     function insert_token(item) {
+        if (!item) return;
         var this_token = settings.tokenFormatter(item);
         this_token = $(this_token)
           .addClass(settings.classes.token)

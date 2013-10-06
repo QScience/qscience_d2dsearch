@@ -35,45 +35,93 @@ function _qscience_d2dsearch_import_paper(){
   }
   // Authors.
   $authors = array();
+  $invalidAuthors = 0;
   if (isset($paper['authors'])) {
     foreach($paper['authors'] as $a) {
-      if (check_plain($a)) {
-        array_push($authors, $a);
+      $authorName = TRUE;
+      $authorId = TRUE;
+      // New entry.
+      if ($a['name'] === $a['id']) {
+        $authorName = check_plain($a['name']);
+        if ($authorName !== FALSE) {
+          $tokens = explode(' ', $authorName, 2);
+          $author = array(
+            'new' => TRUE,
+            'name' => $authorName,
+            'first' => sizeof($tokens) === 2 ? $tokens[0] : '',
+            'last' => sizeof($tokens) === 2 ? $tokens[1] : $tokens[0],
+          );
+        }
+      }
+      else {
+        // Supposedly an existing entry. Check id anyway.
+        $authorId = check_plain($a['id']);
+        if ($authorId!== FALSE) {
+          $author = array(
+            'new' => FALSE,
+            'id' => $authorId,
+          );
+        }
+      }
+      if ($authorId !== FALSE && $authorName !== FALSE) {
+        array_push($authors, $author);
+      }
+      else {
+        $invalidAuthors++;
       }
     }
   }
-  if (empty($authors)) {
+  if (empty($authors) || $invalidAuthors > 0) {
     drupal_json_output(array(
       'success' => false,
-      'message' => 'Missing authors.',
+      'message' => 'Missing or invalid authors.',
     ));
     return;
   }
   // Journal.
   $journal = NULL;
   if (isset($paper['journal'])) {
-    $journal = check_plain($paper['journal']);
+    // New entry.
+    if ($paper['journal']['name'] === $paper['journal']['id']) {
+      $journalName = check_plain($paper['journal']['name']);
+      if ($journalName !== FALSE) {
+        $journal = array(
+          'new' => TRUE,
+          'name' => $journalName,
+        );
+      }
+    }
+    else {
+      // Supposedly an existing entry. Check id anyway.
+      $journalId = check_plain($paper['journal']['id']);
+      if ($journalId !== FALSE) {
+        $journal = array(
+          'new' => FALSE,
+          'id' => $journalId,
+        );
+      }
+    }
   }
   if (empty($journal)) {
     drupal_json_output(array(
       'success' => false,
-      'message' => 'Missing journal.',
+      'message' => 'Missing or invalid journal.',
     ));
     return;
   }
   // Year.
   $year = NULL;
-  if (isset($paper['year'])) {
+  if (isset($paper['year']) && strlen($paper['year']) === 4) {
     $year = check_plain($paper['year']);
   }
   if (empty($year)) {
     drupal_json_output(array(
       'success' => false,
-      'message' => 'Missing year.',
+      'message' => 'Missing or invalid year.',
     ));
     return;
   }
-   // Abstract (can be missing, must be sanitized).
+  // Abstract (can be missing, must be sanitized).
   $abstract = NULL;
   if (isset($paper['abstract'])) {
     $abstract = check_plain($paper['abstract']);
@@ -82,10 +130,23 @@ function _qscience_d2dsearch_import_paper(){
   // Creating the Authors entities.
 
   foreach($authors as $a) {
-    $entity = entity_create('node', array('type' => 'author'));
+    if ($a['new']) {
+      $entity = entity_create('node', array('type' => 'author'));
+      $wrapper = entity_metadata_wrapper('node', $entity);
+      $wrapper->title = $a['name'];
+      $wrapper->first_name = $a['first'];
+      $wrapper->last_name = $a['last'];
+      $newAuthor = $wrapper->save();
+      $a['id'] = $newAuthor->get('nid');
+    }
+  }
+
+  if ($journal['new']) {
+    $entity = entity_create('node', array('type' => 'journal'));
     $wrapper = entity_metadata_wrapper('node', $entity);
-    $wrapper->title = $a;
-    $wrapper->save();
+    $wrapper->title = $journal['name'];
+    $newJournal = $wrapper->save();
+    $journal['id'] = $newJournal->get('nid');
   }
 
   $node = new stdClass();

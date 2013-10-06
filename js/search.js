@@ -265,6 +265,11 @@ jQuery(document).ready(function(){
                     JSUS.sprintf('Year cannot be negative.', null, dlgErrors);
                     valid = false;
                 }
+                if (dlgYear.value > YEAR) {
+                    JSUS.sprintf('Year cannot be greater than ' + YEAR, null, dlgErrors);
+                    valid = false;
+                }
+
                 if (dlgTitle.value.trim().length < 3) {
                     JSUS.sprintf('Invalid or missing title.', null, dlgErrors);
                     valid = false;
@@ -280,7 +285,7 @@ jQuery(document).ready(function(){
                     journal = journal[0];
                     // New token.
                     if (journal.id === journal.name) {
-                        if (journal.name.trim().length < 3) {
+                        if (journal.name.trim().length < 2) {
                             JSUS.sprintf('Invalid journal name.', null, dlgErrors);
                             valid = false;
                         }
@@ -308,9 +313,6 @@ jQuery(document).ready(function(){
                             }
                         }
                     }
-
-                    dlgErrors.style.display = '';
-                    jQuery(dlg).scrollTop();
                 }
 
 
@@ -354,7 +356,8 @@ jQuery(document).ready(function(){
                     });
                 }
                 else {
-
+                    dlgErrors.style.display = '';
+                    jQuery(dlg).scrollTop();
                 }
             },
             Cancel: function() {
@@ -395,6 +398,7 @@ jQuery(document).ready(function(){
 
         // Clear last selection.
         authorTokenInput.tokenInput('clear');
+        journalTokenInput.tokenInput('clear');
         // Populate with authors
 
         jQuery.ajax({

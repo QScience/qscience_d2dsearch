@@ -91,11 +91,11 @@ JSUS.addAttributes2Elem = function (e, a) {
  * Performs string substitution from an args object where the first
  * character of the key bears the following semantic:
  *
- *      - '@': variable substitution with escaping
- *      - '!': variable substitution without variable escaping
+ *  - '@': variable substitution with escaping
+ *  - '!': variable substitution without variable escaping
  *  - '%': wraps a portion of string into a _span_ element to which is possible
- *              to associate a css class or id. Alternatively, it also possible to
- *              add in-line style. E.g.:
+ *           to associate a css class or id. Alternatively, it also possible to
+ *           add in-line style. E.g.:
  *
  * ```javascript
  *      sprintf('%sImportant!%s An error has occurred: %pre@err%pre', {
