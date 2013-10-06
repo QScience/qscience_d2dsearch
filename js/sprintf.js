@@ -91,46 +91,42 @@ JSUS.addAttributes2Elem = function (e, a) {
  * Performs string substitution from an args object where the first
  * character of the key bears the following semantic:
  *
- * 	- '@': variable substitution with escaping
- * 	- '!': variable substitution without variable escaping
+ *      - '@': variable substitution with escaping
+ *      - '!': variable substitution without variable escaping
  *  - '%': wraps a portion of string into a _span_ element to which is possible
- *  		to associate a css class or id. Alternatively, it also possible to
- *  		add in-line style. E.g.:
+ *              to associate a css class or id. Alternatively, it also possible to
+ *              add in-line style. E.g.:
  *
  * ```javascript
- * 	sprintf('%sImportant!%s An error has occurred: %pre@err%pre', {
- * 		'%pre': {
- * 			style: 'font-size: 12px; font-family: courier;'
- * 		},
- * 		'%s': {
- * 			id: 'myId',
- * 			'class': 'myClass',
- * 		},
- * 		'@err': 'file not found',
- * 	}, document.body);
+ *      sprintf('%sImportant!%s An error has occurred: %pre@err%pre', {
+ *              '%pre': {
+ *                      style: 'font-size: 12px; font-family: courier;'
+ *              },
+ *              '%s': {
+ *                      id: 'myId',
+ *                      'class': 'myClass',
+ *              },
+ *              '@err': 'file not found',
+ *      }, document.body);
  * ```
  *
  * @param {string} string A text to transform
- * @param {object} args Optional. An object containing the spans to apply to the string
- * @param {Element} root Optional. An HTML element to which append the string. Defaults, a new _span_ element
+ * @param {object} args Optional. An object containing string transformations
+ * @param {Element} root Optional. An HTML element to which append the string.
+ *   Defaults, a new _span_ element
  *
  */
 JSUS.sprintf = function(string, args, root) {
 
     var text, textNode, span, idx_start, idx_finish, idx_replace, idxs;
-    var tmp, spans, key, i;
+    var spans, key, i, returnElement;
 
     // If no formatting arguments are provided, just create a string
     // and inserted into a span tag. If a root element is provided, add it.
     if (!args) {
-        tmp = document.createElement('span');
-        tmp.appendChild(document.createTextNode(string));
-        if (!root) {
-            return tmp;
-        }
-        else {
-            return root.appendChild(tmp);
-        }
+        returnElement = document.createElement('span');
+        returnElement.appendChild(document.createTextNode(string));
+        return root ? root.appendChild(returnElement) : returnElement;
     }
 
     root = root || document.createElement('span');
@@ -138,46 +134,46 @@ JSUS.sprintf = function(string, args, root) {
 
     // Transform arguments before inserting them.
     for (key in args) {
-	if (args.hasOwnProperty(key)) {
+        if (args.hasOwnProperty(key)) {
 
-	    // pattern not found
-	    if (idx_start === -1) continue;
+            // pattern not found
+            if (idx_start === -1) continue;
 
-	    switch(key[0]) {
+            switch(key[0]) {
 
-	    case '%': // span
+            case '%': // span
 
-		idx_start = string.indexOf(key);
-		idx_replace = idx_start + key.length;
-		idx_finish = string.indexOf(key, idx_replace);
+                idx_start = string.indexOf(key);
+                idx_replace = idx_start + key.length;
+                idx_finish = string.indexOf(key, idx_replace);
 
-		if (idx_finish === -1) {
-		    JSUS.log('Error. Could not find closing key: ' + key);
-		    continue;
-		}
+                if (idx_finish === -1) {
+                    JSUS.log('Error. Could not find closing key: ' + key);
+                    continue;
+                }
 
-		spans[idx_start] = key;
+                spans[idx_start] = key;
 
-		break;
+                break;
 
-	    case '@': // replace and sanitize
-		string = string.replace(key, escape(args[key]));
-		break;
+            case '@': // replace and sanitize
+                string = string.replace(key, escape(args[key]));
+                break;
 
-	    case '!': // replace and not sanitize
-		string = string.replace(key, args[key]);
-		break;
+            case '!': // replace and not sanitize
+                string = string.replace(key, args[key]);
+                break;
 
-	    default:
-		JSUS.log('Identifier not in [!,@,%]: ' + key[0]);
+            default:
+                JSUS.log('Identifier not in [!,@,%]: ' + key[0]);
 
-	    }
-	}
+            }
+        }
     }
 
     // No span to creates.
     if (!JSUS.size(spans)) {
-	return document.createTextNode(string);
+        return root.appendChild(document.createTextNode(string));
     }
 
     // Re-assamble the string.
@@ -186,31 +182,31 @@ JSUS.sprintf = function(string, args, root) {
     idx_finish = 0;
     for (i = 0; i < idxs.length; i++) {
 
-	// add span
-	key = spans[idxs[i]];
-	idx_start = string.indexOf(key);
+        // add span
+        key = spans[idxs[i]];
+        idx_start = string.indexOf(key);
 
-	// add fragments of string
-	if (idx_finish !== idx_start-1) {
-	    root.appendChild(document.createTextNode(string.substring(idx_finish, idx_start)));
-	}
+        // add fragments of string
+        if (idx_finish !== idx_start-1) {
+            root.appendChild(document.createTextNode(string.substring(idx_finish, idx_start)));
+        }
 
-	idx_replace = idx_start + key.length;
-	idx_finish = string.indexOf(key, idx_replace);
+        idx_replace = idx_start + key.length;
+        idx_finish = string.indexOf(key, idx_replace);
 
-	span = JSUS.getElement('span', null, args[key]);
+        span = JSUS.getElement('span', null, args[key]);
 
-	text = string.substring(idx_replace, idx_finish);
+        text = string.substring(idx_replace, idx_finish);
 
-	span.appendChild(document.createTextNode(text));
+        span.appendChild(document.createTextNode(text));
 
-	root.appendChild(span);
-	idx_finish = idx_finish + key.length;
+        root.appendChild(span);
+        idx_finish = idx_finish + key.length;
     }
 
     // add the final part of the string
     if (idx_finish !== string.length) {
-	root.appendChild(document.createTextNode(string.substring(idx_finish)));
+        root.appendChild(document.createTextNode(string.substring(idx_finish)));
     }
 
     return root;

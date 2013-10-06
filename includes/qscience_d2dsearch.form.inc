@@ -38,11 +38,11 @@ function qscience_d2dsearch_main() {
 <label for="title">Title</label>
 <input type="text" name="qsr_import_paper_title" id="qsr_import_paper_title" class="text ui-widget-content ui-corner-all" />
 <span id="qsr_import_paper_authors">
-<label for="qsr_import_paper_author_1">Author/s</label>
-<input type="text" name= "" id="qsr_import_paper_author_1" value="" class="text ui-widget-content ui-corner-all" />
+<label for="qsr_import_paper_author">Author/s</label>
+<input type="text" id="qsr_import_paper_author" value="" class="text ui-widget-content ui-corner-all" />
 </span>
 <label for="qsr_import_paper_journal">Journal</label>
-<input type="text" name="" id="qsr_import_paper_journal" class="text ui-widget-content ui-corner-all"/>
+<input type="text" id="qsr_import_paper_journal" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_year">Year (4 digits)</label>
 <input type="text" id="qsr_import_paper_year" maxlength="4" class="text ui-widget-content ui-corner-all"/>
 <label for="qsr_import_paper_link">External Link</label>

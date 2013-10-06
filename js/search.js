@@ -32,10 +32,9 @@ jQuery(document).ready(function(){
     // Button to open the jQuery dialog to import a paper.
     var importPaper;
     // Input elements of the jQuery dialog.
-    var dlg, dlgAuthors, dlgAbstract, dlgTitle, dlgAuthor1, dlgYear;
-    var dlgJournal, dlgLink, dlgErrors;
-    // The jQuery input box for authors in the dialog.
-    var authorTokenInput;
+    var dlg, dlgAuthors, dlgAbstract, dlgTitle, dlgYear, dlgLink, dlgErrors;
+    // The jQuery input box for authors, and journal in the dialog.
+    var authorTokenInput, journalTokenInput;
     // Year (usefule for validation).
     var YEAR;
     // Clean Url, module url.
@@ -217,38 +216,27 @@ jQuery(document).ready(function(){
     dlgAuthors = document.getElementById('qsr_import_paper_authors');
     dlgAbstract = document.getElementById('qsr_import_paper_abstract');
     dlgTitle = document.getElementById('qsr_import_paper_title');
-    dlgAuthor1 = document.getElementById('qsr_import_paper_author_1');
     dlgYear = document.getElementById('qsr_import_paper_year');
-    dlgJournal = document.getElementById('qsr_import_paper_journal');
     dlgLink = document.getElementById('qsr_import_paper_link');
 
-    // Autocomplete in jQuery dialog
-    function split( val ) {
-        return val.split( /,\s*/ );
-    }
-    function extractLast( term ) {
-        return split( term ).pop();
-    }
-
-    authorTokenInput = jQuery("#qsr_import_paper_author_1").tokenInput(
+    authorTokenInput = jQuery("#qsr_import_paper_author").tokenInput(
         MODULE_URL + 'autocomplete_author', {
             queryParam: 'term',
-            //searchDelay: 2000,
-            //minChars: 4,
+            searchDelay: 200,
+            minChars: 2,
             preventDuplicates: true,
-            hintText: "Type something to start autocomplete",
-            noResultsText: "No results :(",
-            searchingText: "Searching...",
-            onResult: function(data) {
-                //debugger;
-                return (data);
+            noResultsText: "No results :("
+        }
+    );
 
-                var titles = [];
-                for (var i = 0; i < data.length; i++) {
-                    titles.push(data[i].title);
-                }
-                return (titles);
-            }
+    journalTokenInput = jQuery("#qsr_import_paper_journal").tokenInput(
+        MODULE_URL + 'autocomplete_journal', {
+            queryParam: 'term',
+            searchDelay: 200,
+            minChars: 3,
+            tokenLimit: 1,
+            preventDuplicates: true,
+            noResultsText: "No results :("
         }
     );
 
@@ -260,40 +248,67 @@ jQuery(document).ready(function(){
         modal: true,
         buttons: {
             "Import paper": function() {
-                var paper, i, len, args, valid, authors;
+                var paper, i, len, args, valid, authors, journal;
                 valid = true, authors = [];
                 // Clear previous errors.
                 resetDialogErrors()
                 // Validate input.
                 if (dlgYear.value.length !== 4) {
-                    JSUS.sprintf('year must have 4 digits.', null, dlgErrors);
+                    JSUS.sprintf('Year must have 4 digits.', null, dlgErrors);
                     valid = false;
                 }
                 if (isNaN(parseInt(dlgYear.value))) {
-                    JSUS.sprintf('invalid year.', null, dlgErrors);
+                    JSUS.sprintf('Invalid year.', null, dlgErrors);
                     valid = false;
                 }
                 if (dlgYear.value < 0) {
-                    JSUS.sprintf('year cannot be negative.', null, dlgErrors);
+                    JSUS.sprintf('Year cannot be negative.', null, dlgErrors);
                     valid = false;
                 }
                 if (dlgTitle.value.trim().length < 3) {
-                    JSUS.sprintf('invalid or missing title.', null, dlgErrors);
-                    valid = false;
-                }
-                if (dlgJournal.value.trim().length < 3) {
-                    JSUS.sprintf('invalid or missing journal.', null, dlgErrors);
+                    JSUS.sprintf('Invalid or missing title.', null, dlgErrors);
                     valid = false;
                 }
 
-                authors = authorsTokenInput('get');
+                journal = journalTokenInput.tokenInput('get');
+
+                if (!journal.length) {
+                    JSUS.sprintf('Missing journal.', null, dlgErrors);
+                    valid = false;
+                }
+                else {
+                    journal = journal[0];
+                    // New token.
+                    if (journal.id === journal.name) {
+                        if (journal.name.trim().length < 3) {
+                            JSUS.sprintf('Invalid journal name.', null, dlgErrors);
+                            valid = false;
+                        }
+                    }
+                }
+
+                authors = authorTokenInput.tokenInput('get');
 
                 if (!authors.length) {
-                    JSUS.sprintf('insert at least one valid author.', null,
+                    JSUS.sprintf('Insert at least one valid author.', null,
                                  dlgErrors);
                     valid = false;
                 }
                 else {
+                    i = -1, len = authors.length;
+                    for ( ; ++i < len ; ) {
+                        // New token.
+                        if (authors[i].id === authors[i].name) {
+                            if (authors[i].name.trim().length < 3) {
+                                JSUS.sprintf('%spanAuthor name too short: !name%span', {
+                                    '!name': authors[i].name,
+                                    '%span': ''
+                                }, dlgErrors);
+                                valid = false;
+                            }
+                        }
+                    }
+
                     dlgErrors.style.display = '';
                     jQuery(dlg).scrollTop();
                 }
@@ -306,7 +321,7 @@ jQuery(document).ready(function(){
                     paper.authors = authors;
                     paper.year = dlgYear.value;
                     paper.link = dlgLink.value;
-                    paper.journal = dlgJournal.value;
+                    paper.journal = journal;
                     paper.abstractField = dlgAbstract.innerHTML;
 
                     jQuery.ajax({
@@ -354,7 +369,7 @@ jQuery(document).ready(function(){
     function resetDialogErrors() {
         jQuery(dlgErrors).empty();
         dlgErrors.style.display = 'none';
-        JSUS.sprintf('Submission errors:', null, dlgErrors);
+        JSUS.sprintf('Import errors:', null, dlgErrors);
     }
 
 
@@ -376,7 +391,6 @@ jQuery(document).ready(function(){
         dlgAbstract.value = paper.abstractField || '';
         dlgTitle.value = paper.title || '';
         dlgYear.value = paper.year || '';
-        dlgJournal.value = paper.journal || '';
         dlgLink.value = paper.link || '';
 
         // Clear last selection.
@@ -384,17 +398,26 @@ jQuery(document).ready(function(){
         // Populate with authors
 
         jQuery.ajax({
-            url: MODULE_URL + 'resolve_authors',
-            data: { 'authors': JSON.stringify(paper.authors) },
+            url: MODULE_URL + 'resolve_paper',
+            data: {
+                authors: JSON.stringify(paper.authors),
+                journal: JSON.stringify(paper.journal)
+            },
             type: 'POST',
             success: function(data) {
                 var i, len, notFound, notFoundStr;
+                var resolvedAuthors, resolvedJournal, journalKey;
+
+                // Resolved variables are of type  {'name': id }
+                resolvedAuthors = data.authors || {};
+                resolvedJournal = data.journal || {};
                 notFoundStr = 'The following authors could not be resolved, please add them manually:';
                 i = -1, len = paper.authors.length;
+
                 for ( ; ++i < len ; ) {
-                    if (data[paper.authors[i]]) {
+                    if (resolvedAuthors[paper.authors[i]]) {
                         authorTokenInput.tokenInput('add', {
-                            id: data[paper.authors[i]],
+                            id: resolvedAuthors[paper.authors[i]],
                             name: paper.authors[i]
                         });
                     }
@@ -403,6 +426,22 @@ jQuery(document).ready(function(){
                         notFound = true;
                     }
                 }
+
+                if (paper.journal) {
+                    // This is necessary to lower/upper case differences.
+                    journalKey = JSUS.keys(resolvedJournal)[0];
+                    if (paper.journal.toUpperCase() === journalKey.toUpperCase()) {
+                        journalTokenInput.tokenInput('add', {
+                            id: resolvedJournal[journalKey],
+                            name: paper.journal
+                        });
+                    }
+                    else {
+                        notFound = true;
+                        notFoundStr += ' Journal not found, please add it manually: ' + paper.journal;
+                    }
+                }
+
                 if (notFound) {
                     alert(notFoundStr);
                 }

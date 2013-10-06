@@ -36,7 +36,6 @@ function _qscience_d2dsearch_suggest_author(){
  * Matching is always exact.
  */
 function _qscience_d2dsearch_resolve_authors(){
-
   $authors = FALSE;
   if (isset($_POST['authors'])) {
     $authors = drupal_json_decode($_POST['authors']);
@@ -45,6 +44,110 @@ function _qscience_d2dsearch_resolve_authors(){
     drupal_json_output(array());
     return;
   }
+  $authors = _qscience_d2dsearch_resolve_authors_helper($authors);
+  drupal_json_output($authors);
+}
+
+/**
+ * Menu callback; suggests journal names.
+ */
+function _qscience_d2dsearch_suggest_journal(){
+
+  $journal = FALSE;
+  if (isset($_GET['term'])) {
+    $journal = check_plain($_GET['term']);
+  }
+  if (!$journal) {
+    drupal_json_output(array());
+    return;
+  }
+
+  $query = db_select('node', 'n');
+  $query->addField('n', 'nid', 'id');
+  $query->addField('n', 'title', 'name');
+  $query->condition('n.type', 'journal');
+  $query->condition('n.title', '%' . db_like($journal) . '%', 'LIKE');
+
+  $journal = $query->execute()->FetchAll();
+  drupal_json_output($journals);
+}
+
+/**
+ * Menu callback; resolve journal names to entries in the db.
+ *
+ * Matching is always exact.
+ */
+function _qscience_d2dsearch_resolve_journals(){
+
+  $journals = FALSE;
+  if (isset($_POST['journals'])) {
+    $journals = drupal_json_decode($_POST['journals']);
+  }
+  if (empty($journals)) {
+    drupal_json_output(array());
+    return;
+  }
+  $journals = _qscience_d2dsearch_resolve_journals_helper($journals);
+
+  drupal_json_output($journals);
+}
+
+
+/**
+ * Menu callback; resolve all the entities of a paper.
+ *
+ * Matching is always exact.
+ */
+function _qscience_d2dsearch_resolve_paper(){
+
+  $resolvedJournal = array();
+  $resolvedAuthors = array();
+
+  $journal = FALSE;
+  if (isset($_POST['journal'])) {
+    $journal = drupal_json_decode($_POST['journal']);
+  }
+  if (!empty($journal)) {
+    $resolvedJournal = _qscience_d2dsearch_resolve_journals_helper(array($journal));
+  }
+
+  $authors = FALSE;
+  if (isset($_POST['authors'])) {
+    $authors = drupal_json_decode($_POST['authors']);
+  }
+  if (!empty($authors)) {
+    $resolvedAuthors = _qscience_d2dsearch_resolve_authors_helper($authors);
+  }
+
+  drupal_json_output(array(
+    'journal' => $resolvedJournal,
+    'authors' => $resolvedAuthors,
+  ));
+}
+
+function _qscience_d2dsearch_resolve_journals_helper($journals) {
+  $query = db_select('node', 'n');
+  $query->addField('n', 'title', 'name');
+  $query->addField('n', 'nid', 'id');
+  $query->condition('n.type', 'journal');
+
+  $at_least_one = FALSE;;
+  $db_or = db_or();
+  foreach ($journals as $journal) {
+    $journal = check_plain($journal);
+    if ($journal === FALSE) continue;
+    $at_least_one = TRUE;
+    $db_or->condition('n.title', $journal, '=');
+  }
+  if (!$at_least_one) {
+    return array();
+  }
+  $query->condition($db_or);
+  return $query->execute()->FetchAllKeyed();
+}
+
+
+function _qscience_d2dsearch_resolve_authors_helper($authors){
 
   $query = db_select('node', 'n');
   $query->addField('n', 'title', 'name');
@@ -60,11 +163,8 @@ function _qscience_d2dsearch_resolve_authors(){
     $db_or->condition('n.title', $author, '=');
   }
   if (!$at_least_one) {
-    drupal_json_output(array());
-    return;
+    return array();
   }
   $query->condition($db_or);
-  $authors = $query->execute()->FetchAllKeyed();
-
-  drupal_json_output($authors);
+  return $query->execute()->FetchAllKeyed();
 }

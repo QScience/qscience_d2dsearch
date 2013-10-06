@@ -372,9 +372,10 @@ div#qsr_dialog-form input#qsr_import_paper_year {
     width: 80px;
 }
 
-div#qsr_dialog-form input#qsr_import_paper_author_1 {
+div#qsr_dialog-form ul.token-input-list {
     max-height: 200px;
     overflow: auto;
+    margin-bottom: 15px;
 }
 
 div#qsr_dialog-form textarea {
