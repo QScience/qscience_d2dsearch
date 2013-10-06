@@ -345,13 +345,21 @@ jQuery(document).ready(function(){
                             }
                             else {
                                 log('error', 'failed to add paper to local database');
-                                alert('fail: ' + data.message);
+                                alert('An error has occurred: ' + data.message);
+                                // It is safer to close it, because some of the
+                                // references might have been inserted and now
+                                // they have an ID.
+                                jQuery( this ).dialog( "close" );
                             }
 
                         },
                         error: function() {
                             // debugger;
-                            alert('generic failure');
+                            alert('Generic failure while importing paper. Please try again later.');
+                            // It is safer to close it, because some of the
+                            // references might have been inserted and now
+                            // they have an ID.
+                            jQuery( this ).dialog( "close" );
 	                }
                     });
                 }
@@ -451,8 +459,7 @@ jQuery(document).ready(function(){
                 }
             },
             error: function() {
-                // debugger;
-                alert('generic failure');
+                alert('Generic failure while trying to resolve paper references.');
 	    }
         });
 

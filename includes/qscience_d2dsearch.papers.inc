@@ -122,31 +122,16 @@ function _qscience_d2dsearch_import_paper(){
     return;
   }
   // Abstract (can be missing, must be sanitized).
-  $abstract = NULL;
+  $abstract = '';
   if (isset($paper['abstract'])) {
     $abstract = check_plain($paper['abstract']);
   }
-
-  // Creating the Authors entities.
-
-  foreach($authors as $a) {
-    if ($a['new']) {
-      $entity = entity_create('node', array('type' => 'author'));
-      $wrapper = entity_metadata_wrapper('node', $entity);
-      $wrapper->title = $a['name'];
-      $wrapper->first_name = $a['first'];
-      $wrapper->last_name = $a['last'];
-      $newAuthor = $wrapper->save();
-      $a['id'] = $newAuthor->get('nid');
-    }
-  }
-
-  if ($journal['new']) {
-    $entity = entity_create('node', array('type' => 'journal'));
-    $wrapper = entity_metadata_wrapper('node', $entity);
-    $wrapper->title = $journal['name'];
-    $newJournal = $wrapper->save();
-    $journal['id'] = $newJournal->get('nid');
+  if ($abstract === FALSE) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'Invalid abstract.',
+    ));
+    return;
   }
 
   $node = new stdClass();
@@ -156,12 +141,43 @@ function _qscience_d2dsearch_import_paper(){
   $node->language = LANGUAGE_NONE;
   $node->field_abstract[$node->language][0] = $abstract;
 
-  // node_save($node);
+  // Creating the new Journal entity, in case.
+  if ($journal['new']) {
+    $entity = entity_create('node', array('type' => 'journal'));
+    $wrapper = entity_metadata_wrapper('node', $entity);
+    $wrapper->title = $journal['name'];
+    $newJournal = $wrapper->save();
+    $journal['id'] = $newJournal->getIdentifier();
+  }
+  $node->journal_reference[$node->language][]['target_id'] = $journal['id'];
 
-  drupal_json_output(array(
-    'success' => true,
-    'message' => 'Paper added to database.',
-  ));
+  // Creating the new Author entities, in case
+  foreach($authors as $a) {
+    if ($a['new']) {
+      $entity = entity_create('node', array('type' => 'author'));
+      $wrapper = entity_metadata_wrapper('node', $entity);
+      $wrapper->title = $a['name'];
+      $wrapper->first_name = $a['first'];
+      $wrapper->last_name = $a['last'];
+      $newAuthor = $wrapper->save();
+      $a['id'] = $newAuthor->getIdentifier();
+    }
+    $node->author_reference[$node->language][]['target_id'] = $a['id'];
+  }
+
+  try {
+    node_save($node);
+    drupal_json_output(array(
+      'success' => true,
+      'message' => 'Paper added to database.',
+    ));
+  }
+  catch(Exception $e) {
+    drupal_json_output(array(
+      'success' => false,
+      'message' => 'An error occurred while saving node.',
+    ));
+  }
 }
 
 /**
