@@ -23,10 +23,12 @@ jQuery(document).ready(function(){
     var paginator, prev_results, next_results, pages;
     // Last added page, and currently displayed page.
     var curLastPage, curDisplayedPage;
+    // Last displayed element when creating the pages.
+    var lastDisplayed;
     // Minimal Levenshtein distance for two papers to be similar.
     var MIN_LEV_DIST;
     // NDDB database of pages, and results;
-    var db, pagesDB;
+    // var db, pagesDB;
     // How many results to display per page
     var displayN;
     // Button to open the jQuery dialog to import a paper.
@@ -133,6 +135,7 @@ jQuery(document).ready(function(){
 
     // How many results display in the page.
     displayN = 10;
+    lastDisplayed = 0;
     countDisplayed = 0;
     countDuplicates = 0;
     curLastPage = 0;
@@ -472,16 +475,15 @@ jQuery(document).ready(function(){
 
     function displayResults() {
         if (db.db.length <= displayN) {
-            displayLot(JSUS.seq(0, (db.db.length-1)));
+            displayLot(JSUS.seq(lastDisplayed, (db.db.length-1)));
+            lastDisplayed = db.db.length - 1;
         }
         if (db.db.length % displayN === 0) {
             curLastPage = addPage(curLastPage, displayN);
         }
 
-        // Update header. 'displayed' was already updated, and db + 1 because
-        // this element has not yet been inserted.
         updateHeader({
-            found: (db.db.length + 1),
+            found: db.db.length,
             duplicates: countDuplicates,
         });
     }
