@@ -250,7 +250,7 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     $my_instance = d2d_api_own_instance_get();
     $my_url = substr($my_instance['url'], 0,
                      strpos($my_instance['url'], 'xmlrpc.php'));
-    
+
     drupal_add_library('system', 'ui.progressbar');
     drupal_add_library('system', 'ui.autocomplete');
     drupal_add_js(array(
@@ -302,7 +302,6 @@ function qscience_d2dsearch_get_results() {
     'new_results' => $new_results,
   ));
 }
-
 
 /**
  * Fetches and formats new results that have been asyncronously added to db.

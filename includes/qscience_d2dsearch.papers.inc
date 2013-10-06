@@ -3,7 +3,7 @@
 /**
  * @file
  *
- * Performs a query search for papers in the local database
+ * Performs a query search for papers in the local database.
  */
 
 /**
@@ -87,7 +87,7 @@ function _qscience_d2dsearch_import_paper(){
     $wrapper->title = $a;
     $wrapper->save();
   }
-  
+
   $node = new stdClass();
   $node->type = 'paper';
   node_object_prepare($node);

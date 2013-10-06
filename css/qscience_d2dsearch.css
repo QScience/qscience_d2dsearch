@@ -372,6 +372,11 @@ div#qsr_dialog-form input#qsr_import_paper_year {
     width: 80px;
 }
 
+div#qsr_dialog-form input#qsr_import_paper_author_1 {
+    max-height: 200px;
+    overflow: auto;
+}
+
 div#qsr_dialog-form textarea {
     height: 150px;
     width: 98%;

@@ -382,10 +382,36 @@ jQuery(document).ready(function(){
         // Clear last selection.
         authorTokenInput.tokenInput('clear');
         // Populate with authors
-//        i = -1, len = paper.authors.length;
-//        for ( ; ++i < len ; ) {
-//            authorTokenInput("add", {id: , name: y});
-//        }
+
+        jQuery.ajax({
+            url: MODULE_URL + 'resolve_authors',
+            data: { 'authors': JSON.stringify(paper.authors) },
+            type: 'POST',
+            success: function(data) {
+                var i, len, notFound, notFoundStr;
+                notFoundStr = 'The following authors could not be resolved, please add them manually:';
+                i = -1, len = paper.authors.length;
+                for ( ; ++i < len ; ) {
+                    if (data[paper.authors[i]]) {
+                        authorTokenInput.tokenInput('add', {
+                            id: data[paper.authors[i]],
+                            name: paper.authors[i]
+                        });
+                    }
+                    else {
+                        notFoundStr += ' ' + i;
+                        notFound = true;
+                    }
+                }
+                if (notFound) {
+                    alert(notFoundStr);
+                }
+            },
+            error: function() {
+                // debugger;
+                alert('generic failure');
+	    }
+        });
 
         jQuery( "#qsr_dialog-form" )
             .data('idxPaper', paper.idx)
@@ -814,9 +840,6 @@ jQuery(document).ready(function(){
 	        }
                 else {
                     log('info', 'search completed.');
-                    if (ids === '') {
-                        found.innerHTML = 'No results found.';
-                    }
                 }
             }
         });

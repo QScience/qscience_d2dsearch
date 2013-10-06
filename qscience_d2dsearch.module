@@ -36,6 +36,11 @@ function qscience_d2dsearch_menu() {
     'access arguments' => array('use qscience search'),
     'type' => MENU_CALLBACK,
   );
+  $items['qscience_search/resolve_authors'] = array(
+    'page callback' => '_qscience_d2dsearch_resolve_authors',
+    'access arguments' => array('use qscience search'),
+    'type' => MENU_CALLBACK,
+  );
   $items['qscience_search/autocomplete_journal'] = array(
     'page callback' => '_qscience_d2dsearch_suggest_journal',
     'access arguments' => array('use qscience search'),
@@ -68,6 +73,7 @@ function qscience_d2dsearch_d2dsearch_query_type() {
   $types = array();
   $types['qscience_d2dsearch_papers'] = array(
     'callback' => '_qscience_d2dsearch_papers_callback',
+    // 'post_process' => '_qscience_d2dsearch_papers_post_process',
   );
 
   return $types;

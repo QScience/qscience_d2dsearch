@@ -197,12 +197,15 @@ $.TokenList = function (input, url_or_data, settings) {
         })
         .blur(function () {
             hide_dropdown();
-            $(this).val("");
+            // commented to support adding new tags.
+            // $(this).val("");
+
         })
         .bind("keyup keydown blur update", resize_input)
         .keydown(function (event) {
             var previous_token;
             var next_token;
+            var newTokenId;
 
             switch(event.keyCode) {
                 case KEY.LEFT:
@@ -267,12 +270,23 @@ $.TokenList = function (input, url_or_data, settings) {
                 case KEY.ENTER:
                 case KEY.NUMPAD_ENTER:
                 case KEY.COMMA:
-                  if(selected_dropdown_item) {
+                if (selected_dropdown_item) {
                     add_token($(selected_dropdown_item).data("tokeninput"));
                     hidden_input.change();
                     return false;
-                  }
-                  break;
+                }
+                // else branch is added to support adding new tags.
+                else {
+                    newTokenId = $(this).val();
+                    if (newTokenId.trim() !== '') {
+                        add_token({
+                            id: newTokenId,
+                            name: newTokenId
+                        });
+                    }
+                    return false;
+                }
+                break;
 
                 case KEY.ESCAPE:
                   hide_dropdown();
@@ -495,6 +509,11 @@ $.TokenList = function (input, url_or_data, settings) {
             token_list.children().each(function () {
                 var existing_token = $(this);
                 var existing_data = $.data(existing_token.get(0), "tokeninput");
+                if ('undefined' === typeof item) {
+                    // This happens sometimes when a new item is created.
+                    // Not clear why.
+                    return false;
+                }
                 if(existing_data && existing_data.id === item.id) {
                     found_existing_token = existing_token;
                     return false;
