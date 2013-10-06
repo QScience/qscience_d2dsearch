@@ -132,7 +132,7 @@ jQuery(document).ready(function(){
     // Init other variables.
 
     // How many results display in the page.
-    displayN = 100;
+    displayN = 10;
     countDisplayed = 0;
     countDuplicates = 0;
     curLastPage = 0;
@@ -340,7 +340,7 @@ jQuery(document).ready(function(){
                                 importButton.src = MODULE_PATH + 'images/added.png';
                                 importButton.alt = 'Paper already added to local database.';
                                 importButton.title = 'Paper already added to local database.';
-                                alert('success!');
+                                alert('Paper imported succesfully!');
                                 jQuery( "#qsr_dialog-form" ).dialog( "close" );
                             }
                             else {
@@ -471,19 +471,11 @@ jQuery(document).ready(function(){
 
 
     function displayResults() {
-        if (db.db.length >= displayN) {
-            // We cannot append them directly before the above condition is met
-            // because object is not yet inserted in db, and object.div is not
-            // sync with the browser document.
-
-            if (db.db.length % displayN === 0) {
-                // Indexes are not build on first insert, so let's do it now.
-                if (db.db.length === displayN) {
-                    // pagesDB.rebuildIndexes();
-                    displayLot(JSUS.seq(0, displayN - 1));
-                }
-                curLastPage = addPage(curLastPage, displayN);
-            }
+        if (db.db.length <= displayN) {
+            displayLot(JSUS.seq(0, (db.db.length-1)));
+        }
+        if (db.db.length % displayN === 0) {
+            curLastPage = addPage(curLastPage, displayN);
         }
 
         // Update header. 'displayed' was already updated, and db + 1 because
