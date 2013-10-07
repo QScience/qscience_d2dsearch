@@ -11,6 +11,7 @@ define('QSCIENCE_D2DSEARCH_MAX_QUERY_LENGTH', 64);
  * Menu callback; builds the search page.
  */
 function qscience_d2dsearch_main() {
+  drupal_set_title('QScience D2D Search');
   drupal_add_css(drupal_get_path('module', 'qscience_d2dsearch') . '/css/qscience_d2dsearch.css');
 
   $build['main'] = array(

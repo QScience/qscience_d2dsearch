@@ -16,6 +16,7 @@ require_once 'includes/qscience_d2dsearch.suggest.inc';
 function qscience_d2dsearch_menu() {
   $items['qscience_search'] = array(
     'title' => 'QScience Search',
+    'description' => 'Search for papers in your friends network',
     'page callback' => 'qscience_d2dsearch_main',
     'access arguments' => array('use qscience search'),
     'type' => MENU_LOCAL_TASK,
