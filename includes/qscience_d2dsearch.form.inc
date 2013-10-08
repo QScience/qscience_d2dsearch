@@ -172,7 +172,7 @@ function qscience_d2dsearch_form_search_validate($form, &$form_state) {
             intval($fromArray['day']),
             intval($fromArray['year']));
 
-  $now = mktime();
+  $now = time();
   if ($fromTS > $now) {
     form_set_error('date_from', t('From date cannot be in the future.'));
   }
