@@ -269,6 +269,11 @@ function qscience_d2dsearch_form_search_submit($form, &$form_state) {
     drupal_add_js($path . '/js/jquery.tokeninput.js');
     // The search script.
     drupal_add_js($path . '/js/search.js');
+
+    if (module_exists('vijo')) {
+      // add vijo api js
+      drupal_add_js(drupal_get_path('module', 'vijo') .'/javascript/vijo.api.js');
+    }
   }
 }
 

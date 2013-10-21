@@ -2,7 +2,7 @@
  * @file
  * Javascript support of the search interface.
  */
-jQuery(document).ready(function(){
+jQuery(document).ready(function() {
     // Base_path and QScience_search path as taken from Drupal.
     var BASE_PATH, MODULE_PATH;
     // The url of my instance (to check which results are local)
@@ -44,14 +44,18 @@ jQuery(document).ready(function(){
 
     // Creating Pages database.
     pagesDB = new NDDB({
-        update: { indexes: true }
+        update: {
+            indexes: true
+        }
     });
     pagesDB.index('page', function(o) {
         return o.page;
     });
     // Creating Results database.
     db = new NDDB({
-        update: { indexes: true }
+        update: {
+            indexes: true
+        }
     });
     db.on('insert', function(o) {
         var idxExisting;
@@ -64,8 +68,7 @@ jQuery(document).ready(function(){
         if (idxExisting === -1) {
             o.newResult = true;
             log('info', o.friend_url + ': new result added.');
-        }
-        else {
+        } else {
             o.newResult = false;
             db.idx.update(idxExisting, {
                 similar: o.idx,
@@ -102,13 +105,11 @@ jQuery(document).ready(function(){
             friendCountSpan.onclick = function() {
                 if (parentDiv.style.display === '') {
                     parentDiv.style.display = 'none';
-                }
-                else {
+                } else {
                     parentDiv.style.display = '';
                 }
-            }
-        }
-        else {
+            };
+        } else {
             log('error', 'could not find similar result with id: ' + o.idx);
         }
     });
@@ -125,11 +126,11 @@ jQuery(document).ready(function(){
     MY_INSTANCE = Drupal.settings.my_instance;
     SEARCH_TYPE = Drupal.settings.searchType;
     CLEAN_URL = Drupal.settings.clean_url === "1";
-    MODULE_URL = BASE_PATH  + (CLEAN_URL ? '' : '?q=') + 'qscience_search/';
+    MODULE_URL = BASE_PATH + (CLEAN_URL ? '' : '?q=') + 'qscience_search/';
     ABS_MAX_LENGTH = 100;
     INCREMENT = 10;
     MIN_LEV_DIST = 5;
-    YEAR = new Date().getFullYear()
+    YEAR = new Date().getFullYear();
 
     // Init other variables.
 
@@ -177,8 +178,7 @@ jQuery(document).ready(function(){
         if (myConsole.style.height === '0px') {
             myConsole.style.height = '50px';
             hideconsole.innerHTML = ' >> hide console';
-        }
-        else {
+        } else {
             myConsole.style.height = '0px';
             hideconsole.innerHTML = ' >> show console';
         }
@@ -188,14 +188,14 @@ jQuery(document).ready(function(){
     paginator.style.display = '';
 
     // Creating the Progress Bar.
-    progressbar = jQuery( "#progressbar" );
+    progressbar = jQuery("#progressbar");
     progressbar.toggle();
 
-    progressLabel = jQuery( ".progress-label" );
+    progressLabel = jQuery(".progress-label");
     progressbar.progressbar({
         value: false,
         change: function() {
-            progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+            progressLabel.text(progressbar.progressbar("value") + "%");
         },
         complete: function() {
             var checkAgain;
@@ -204,11 +204,13 @@ jQuery(document).ready(function(){
             checkAgain.appendChild(document.createTextNode('Check again'));
             checkAgain.onclick = function() {
                 // Reset progress bar status.
-                progressbar.progressbar({ value: 0 });
+                progressbar.progressbar({
+                    value: 0
+                });
                 log('info', 'search restarted');
                 worker();
-            }
-            progressLabel.html( "Search completed. " );
+            };
+            progressLabel.html("Search completed. ");
             progressLabel.append(checkAgain);
         }
     });
@@ -244,7 +246,7 @@ jQuery(document).ready(function(){
     );
 
     // Creating the jQuery dialog.
-    jQuery( "#qsr_dialog-form" ).dialog({
+    jQuery("#qsr_dialog-form").dialog({
         autoOpen: false,
         height: 500,
         width: 600,
@@ -254,7 +256,7 @@ jQuery(document).ready(function(){
                 var paper, i, len, args, valid, authors, journal;
                 valid = true, authors = [];
                 // Clear previous errors.
-                resetDialogErrors()
+                resetDialogErrors();
                 // Validate input.
                 if (dlgYear.value.length !== 4) {
                     JSUS.sprintf('Year must have 4 digits.', null, dlgErrors);
@@ -283,8 +285,7 @@ jQuery(document).ready(function(){
                 if (!journal.length) {
                     JSUS.sprintf('Missing journal.', null, dlgErrors);
                     valid = false;
-                }
-                else {
+                } else {
                     journal = journal[0];
                     // New token.
                     if (journal.id === journal.name) {
@@ -299,12 +300,11 @@ jQuery(document).ready(function(){
 
                 if (!authors.length) {
                     JSUS.sprintf('Insert at least one valid author.', null,
-                                 dlgErrors);
+                        dlgErrors);
                     valid = false;
-                }
-                else {
+                } else {
                     i = -1, len = authors.length;
-                    for ( ; ++i < len ; ) {
+                    for (; ++i < len;) {
                         // New token.
                         if (authors[i].id === authors[i].name) {
                             if (authors[i].name.trim().length < 3) {
@@ -331,7 +331,9 @@ jQuery(document).ready(function(){
 
                     jQuery.ajax({
                         url: MODULE_URL + 'import_paper',
-                        data: { 'paper': JSON.stringify(paper) },
+                        data: {
+                            'paper': JSON.stringify(paper)
+                        },
                         type: 'POST',
                         success: function(data) {
                             var importButton, idxPaper;
@@ -344,15 +346,14 @@ jQuery(document).ready(function(){
                                 importButton.alt = 'Paper already added to local database.';
                                 importButton.title = 'Paper already added to local database.';
                                 alert('Paper imported succesfully!');
-                                jQuery( "#qsr_dialog-form" ).dialog( "close" );
-                            }
-                            else {
+                                jQuery("#qsr_dialog-form").dialog("close");
+                            } else {
                                 log('error', 'failed to add paper to local database');
                                 alert('An error has occurred: ' + data.message);
                                 // It is safer to close it, because some of the
                                 // references might have been inserted and now
                                 // they have an ID.
-                                jQuery( this ).dialog( "close" );
+                                jQuery(this).dialog("close");
                             }
 
                         },
@@ -362,17 +363,16 @@ jQuery(document).ready(function(){
                             // It is safer to close it, because some of the
                             // references might have been inserted and now
                             // they have an ID.
-                            jQuery( this ).dialog( "close" );
-	                }
+                            jQuery(this).dialog("close");
+                        }
                     });
-                }
-                else {
+                } else {
                     dlgErrors.style.display = '';
                     jQuery(dlg).scrollTop();
                 }
             },
             Cancel: function() {
-                jQuery( this ).dialog( "close" );
+                jQuery(this).dialog("close");
             }
         },
         close: function() {
@@ -429,14 +429,13 @@ jQuery(document).ready(function(){
                 notFoundStr = 'The following authors could not be resolved, please add them manually:';
                 i = -1, len = paper.authors.length;
 
-                for ( ; ++i < len ; ) {
+                for (; ++i < len;) {
                     if (resolvedAuthors[paper.authors[i]]) {
                         authorTokenInput.tokenInput('add', {
                             id: resolvedAuthors[paper.authors[i]],
                             name: paper.authors[i]
                         });
-                    }
-                    else {
+                    } else {
                         notFoundStr += ' ' + i;
                         notFound = true;
                     }
@@ -450,8 +449,7 @@ jQuery(document).ready(function(){
                             id: resolvedJournal[journalKey],
                             name: paper.journal
                         });
-                    }
-                    else {
+                    } else {
                         notFound = true;
                         notFoundStr += ' Journal not found, please add it manually: ' + paper.journal;
                     }
@@ -463,19 +461,19 @@ jQuery(document).ready(function(){
             },
             error: function() {
                 alert('Generic failure while trying to resolve paper references.');
-	    }
+            }
         });
 
-        jQuery( "#qsr_dialog-form" )
+        jQuery("#qsr_dialog-form")
             .data('idxPaper', paper.idx)
-            .dialog( "open" );
+            .dialog("open");
 
     }
 
 
     function displayResults() {
         if (db.db.length <= displayN) {
-            displayLot(JSUS.seq(lastDisplayed, (db.db.length-1)));
+            displayLot(JSUS.seq(lastDisplayed, (db.db.length - 1)));
             lastDisplayed = db.db.length - 1;
         }
         if (db.db.length % displayN === 0) {
@@ -496,8 +494,7 @@ jQuery(document).ready(function(){
 
         if (pageId === 1) {
             prev_results.style.display = 'none';
-        }
-        else if (pageId === curLastPage) {
+        } else if (pageId === curLastPage) {
             next_results.style.display = 'none';
         }
 
@@ -521,7 +518,7 @@ jQuery(document).ready(function(){
 
         // Scroll Up.
         resultDiv.scrollTop = 0;
-        jQuery( resultDiv ).scrollTop();
+        jQuery(resultDiv).scrollTop();
     }
 
     function addPage(curLastPage, range) {
@@ -541,11 +538,10 @@ jQuery(document).ready(function(){
             page.className = 'curPage';
             // currently displayed.
             curDisplayedPage = newLastPage;
-        }
-        else {
+        } else {
             page.onclick = function() {
                 pageClicked(newLastPage);
-            }
+            };
         }
         page.appendChild(document.createTextNode(newLastPage));
         pages.appendChild(page);
@@ -554,7 +550,7 @@ jQuery(document).ready(function(){
             ids: ids,
             page: newLastPage
         });
-        return newLastPage
+        return newLastPage;
     }
 
     function displayLot(ids, only) {
@@ -569,13 +565,13 @@ jQuery(document).ready(function(){
         if (only) {
             appended = db.appended.db;
             i = -1, len = appended.length;
-            for ( ; ++i < len ; ) {
+            for (; ++i < len;) {
                 makeResultInvisible(appended[i]);
             }
         }
         // Showing the new elements;
         i = -1, len = ids.length;
-        for ( ; ++i < len ; ) {
+        for (; ++i < len;) {
             makeResultVisible(db.idx.get(ids[i]));
         }
     }
@@ -583,7 +579,9 @@ jQuery(document).ready(function(){
     function makeResultVisible(o) {
         if (!o.appended) {
             resultDiv.appendChild(o.div);
-            db.idx.update(o.idx, { appended: true });
+            db.idx.update(o.idx, {
+                appended: true
+            });
             // Update header.
             updateHeader({
                 displayed: ++countDisplayed
@@ -595,13 +593,14 @@ jQuery(document).ready(function(){
         if (o.appended) {
             try {
                 resultDiv.removeChild(o.div);
-                db.idx.update(o.idx, { appended: false });
+                db.idx.update(o.idx, {
+                    appended: false
+                });
                 // Update header.
                 updateHeader({
                     displayed: --countDisplayed
                 });
-            }
-            catch(e) {
+            } catch (e) {
                 log('error', e);
             }
         }
@@ -623,7 +622,7 @@ jQuery(document).ready(function(){
     function isSamePub(idx, title) {
         var i, len, item;
         i = 0, len = db.db.length;
-        for ( ; i < len ; i++ ) {
+        for (; i < len; i++) {
             item = db.db[i];
             if (item.idx === idx) continue;
             if (levenshtein(title, item.title) < MIN_LEV_DIST) {
@@ -640,25 +639,27 @@ jQuery(document).ready(function(){
         if (e.style.display === 'block') {
             e.style.display = 'none';
             dots.innerHTML = '(...)';
-        }
-        else {
+        } else {
             e.style.display = 'block';
             dots.innerHTML = '(hide)';
         }
     }
+
     function progress() {
-        var val = progressbar.progressbar( "value" ) || 0;
-        progressbar.progressbar( "value", val + INCREMENT );
+        var val = progressbar.progressbar("value") || 0;
+        progressbar.progressbar("value", val + INCREMENT);
     }
 
     function log(level, text) {
         var args = {
             '!level': level,
-            '%pre': { 'class': level }
+            '%pre': {
+                'class': level
+            }
         };
         JSUS.sprintf('%pre!level - ' + text + '%pre', args, myConsole);
         // Scroll to keep the last line always visible.
-        myConsole.scrollTop = myConsole.scrollHeight
+        myConsole.scrollTop = myConsole.scrollHeight;
     }
 
     function createResultDiv(data, idx) {
@@ -669,6 +670,7 @@ jQuery(document).ready(function(){
         var abs1, abs2, dots;
         var sameDiv, sameFriend, sameFriendSpan;
         var i, len;
+        var addToVijo;
 
         // Creating the div container.
         div = document.createElement('div');
@@ -710,8 +712,7 @@ jQuery(document).ready(function(){
         if (data.friend_url === MY_INSTANCE) {
             div.className = div.className + ' ' + 'my_result';
             friend.appendChild(document.createTextNode('Local result'));
-        }
-        else {
+        } else {
             friendLink = document.createElement('a');
             friendLink.href = data.friend_url;
             friendLink.target = '_blank';
@@ -795,8 +796,7 @@ jQuery(document).ready(function(){
             abstractField.appendChild(abs1);
             abstractField.appendChild(abs2);
             abstractField.appendChild(dots);
-        }
-        else {
+        } else {
             abstractField.appendChild(document.createTextNode(data.abstractField));
         }
 
@@ -822,8 +822,35 @@ jQuery(document).ready(function(){
             importPaper.title = "Import paper in local database.";
             importPaper.onclick = function() {
                 displayAddPaperBox(data, idx);
-            }
+            };
             actions.appendChild(importPaper);
+        }
+
+        // Button to create a ViJo
+        if (typeof(vijoAPI) !== 'undefined') {
+            addToVijo = document.createElement('img');
+            addToVijo.id = "qsr_action_import_" + idx;
+            addToVijo.src = 'http://vijo.inn.ac/img/logo-big.png';
+            addToVijo.width = '20';
+            addToVijo.setAttribute('style', 'margin:2px; margin-left:3px;margin-right:3px;padding:1px;border:solid #e47140 1px;border-radius:2px;');
+            addToVijo.alt = "Create a ViJo based on this paper.";
+            addToVijo.title = "Create a ViJo based on this paper.";
+            addToVijo.onclick = function() {
+                data.abstract = data.abstractField;
+                vijoAPI.createViJo(data, function(data) {
+                    var div = document.createElement('div');
+                    div.innerHTML = '<p>The ViJo has been successfully created at this address: <a href="http://vijo.inn.ac/#/virtualjournal/' + data.virtualjournal_id + '" target="_blank">http://vijo.inn.ac/#/virtualjournal/' + data.virtualjournal_id + '</a></p>';
+                    div.setAttribute('title', 'ViJo Created');
+                    div.setAttribute('id', 'vijo-dialog-to-remove-added');
+                    jQuery(div).dialog();
+                });
+                this.style.backgroundColor = '#e47140';
+                this.src = 'http://vijo.inn.ac/img/logo.png';
+                addToVijo.alt = "ViJo already created.";
+                addToVijo.title = "ViJo already created.";
+
+            };
+            actions.appendChild(addToVijo);
         }
         // Add all divs to resultDiv.
         div.appendChild(iconSide);
@@ -843,7 +870,10 @@ jQuery(document).ready(function(){
     function worker() {
         jQuery.ajax({
             url: MODULE_URL + 'get_result',
-            data: { 'query_id': Drupal.settings.query_id, 'ids': ids },
+            data: {
+                'query_id': Drupal.settings.query_id,
+                'ids': ids
+            },
             type: 'POST',
             success: function(data) {
                 var i, len;
@@ -865,7 +895,7 @@ jQuery(document).ready(function(){
                 ids = data.ids;
 
                 len = data.new_results.length;
-                for (i = 0; i < len; i++){
+                for (i = 0; i < len; i++) {
                     db.insert(data.new_results[i]);
                     displayResults();
                 }
@@ -873,16 +903,15 @@ jQuery(document).ready(function(){
             error: function() {
                 // debugger;
                 alert('failure');
-	        jQuery("#qscience_d2dsearch_progress")
+                jQuery("#qscience_d2dsearch_progress")
                     .html("This search " + counter + "% done.");
-	    },
+            },
             complete: function() {
                 // debugger;
                 // Schedule the next request when the current one's complete
-	        if (progressbar.progressbar( "value" ) < 100) {
-      	            setTimeout(worker, 1000);
-	        }
-                else {
+                if (progressbar.progressbar("value") < 100) {
+                    setTimeout(worker, 1000);
+                } else {
                     log('info', 'search completed.');
                 }
             }
