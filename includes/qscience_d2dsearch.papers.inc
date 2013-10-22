@@ -139,7 +139,7 @@ function _qscience_d2dsearch_import_paper(){
   node_object_prepare($node);
   $node->title = $title;
   $node->language = LANGUAGE_NONE;
-  $node->field_abstract[$node->language][0]['value'] = $abstract;
+  $node->abstract[$node->language][0]['value'] = $abstract;
 
   // Creating the new Journal entity, in case.
   if ($journal['new']) {
