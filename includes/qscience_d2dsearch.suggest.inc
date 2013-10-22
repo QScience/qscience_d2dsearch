@@ -134,7 +134,7 @@ function _qscience_d2dsearch_resolve_journals_helper($journals) {
   $at_least_one = FALSE;;
   $db_or = db_or();
   foreach ($journals as $journal) {
-    $journal = check_plain($journal);
+    $journal = check_plain(trim($journal));
     if ($journal === FALSE) continue;
     $at_least_one = TRUE;
     $db_or->condition('n.title', $journal, '=');
@@ -157,7 +157,7 @@ function _qscience_d2dsearch_resolve_authors_helper($authors){
   $at_least_one = FALSE;;
   $db_or = db_or();
   foreach ($authors as $author) {
-    $author = check_plain($author);
+    $author = check_plain(trim($author));
     if ($author === FALSE) continue;
     $at_least_one = TRUE;
     $db_or->condition('n.title', $author, '=');

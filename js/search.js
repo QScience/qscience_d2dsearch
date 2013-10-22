@@ -420,6 +420,7 @@ jQuery(document).ready(function() {
             },
             type: 'POST',
             success: function(data) {
+                debugger;
                 var i, len, notFound, notFoundStr;
                 var resolvedAuthors, resolvedJournal, journalKey;
 
@@ -436,7 +437,7 @@ jQuery(document).ready(function() {
                             name: paper.authors[i]
                         });
                     } else {
-                        notFoundStr += ' ' + i;
+                        notFoundStr += ' ' + paper.authors[i];
                         notFound = true;
                     }
                 }
@@ -804,7 +805,7 @@ jQuery(document).ready(function() {
         content.appendChild(title);
         content.appendChild(document.createElement('br'));
         content.appendChild(underTitle);
-        content.appendChild(document.createElement('br'))
+        content.appendChild(document.createElement('br'));
         content.appendChild(abstractField);
 
         // Similar.
