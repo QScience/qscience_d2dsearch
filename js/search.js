@@ -436,7 +436,7 @@ jQuery(document).ready(function() {
                             name: paper.authors[i]
                         });
                     } else {
-                        notFoundStr += ' ' + i;
+                        notFoundStr += ' ' + paper.authors[i];
                         notFound = true;
                     }
                 }
@@ -444,7 +444,8 @@ jQuery(document).ready(function() {
                 if (paper.journal) {
                     // This is necessary to lower/upper case differences.
                     journalKey = JSUS.keys(resolvedJournal)[0];
-                    if (paper.journal.toUpperCase() === journalKey.toUpperCase()) {
+                    if (journalKey &&
+                        paper.journal.toUpperCase() === journalKey.toUpperCase()) {
                         journalTokenInput.tokenInput('add', {
                             id: resolvedJournal[journalKey],
                             name: paper.journal
