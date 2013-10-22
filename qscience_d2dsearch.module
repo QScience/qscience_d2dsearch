@@ -9,7 +9,6 @@ require_once 'includes/qscience_d2dsearch.form.inc';
 require_once 'includes/qscience_d2dsearch.papers.inc';
 require_once 'includes/qscience_d2dsearch.suggest.inc';
 
-
 /**
  * Implements hook_menu_alter().
  */
@@ -89,5 +88,3 @@ function qscience_d2dsearch_d2dsearch_query_type() {
 
   return $types;
 }
-
-
