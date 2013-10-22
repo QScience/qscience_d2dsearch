@@ -420,7 +420,6 @@ jQuery(document).ready(function() {
             },
             type: 'POST',
             success: function(data) {
-                debugger;
                 var i, len, notFound, notFoundStr;
                 var resolvedAuthors, resolvedJournal, journalKey;
 
