@@ -327,7 +327,7 @@ jQuery(document).ready(function() {
                     paper.year = dlgYear.value;
                     paper.link = dlgLink.value;
                     paper.journal = journal;
-                    paper.abstractField = dlgAbstract.innerHTML;
+                    paper.abstractField = dlgAbstract.value;
 
                     jQuery.ajax({
                         url: MODULE_URL + 'import_paper',
