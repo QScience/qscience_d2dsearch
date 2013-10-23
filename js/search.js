@@ -69,6 +69,7 @@ jQuery(document).ready(function() {
             o.newResult = true;
             log('info', o.friend_url + ': new result added.');
         } else {
+            // o.similar.push(idxExisting);
             o.newResult = false;
             db.idx.update(idxExisting, {
                 similar: o.idx,
@@ -97,11 +98,10 @@ jQuery(document).ready(function() {
         friendCountSpan = o.div.childNodes[2].childNodes[1];
         if (friendCountSpan) {
             friendCountSpan.innerHTML = '+' + o.similar.length;
-            friendCountSpan.style.display = '';
+            friendCountSpan.style.display = 'inline';
             //parentDiv = document.getElementById('qsr_similar_' + o.idx);
             parentDiv = o.div.childNodes[4];
             parentDiv.appendChild(childDiv);
-
             friendCountSpan.onclick = function() {
                 if (parentDiv.style.display === '') {
                     parentDiv.style.display = 'none';
@@ -422,21 +422,20 @@ jQuery(document).ready(function() {
             success: function(data) {
                 var i, len, notFound, notFoundStr;
                 var resolvedAuthors, resolvedJournal, journalKey;
-
                 // Resolved variables are of type  {'name': id }
                 resolvedAuthors = data.authors || {};
                 resolvedJournal = data.journal || {};
-                notFoundStr = 'The following authors could not be resolved, please add them manually:';
+                notFoundStr = 'The following authors could not be resolved, please add them manually:\n';
                 i = -1, len = paper.authors.length;
 
                 for (; ++i < len;) {
-                    if (resolvedAuthors[paper.authors[i]]) {
+                    if (resolvedAuthors[paper.authors[i].trim()]) {
                         authorTokenInput.tokenInput('add', {
-                            id: resolvedAuthors[paper.authors[i]],
-                            name: paper.authors[i]
+                            id: resolvedAuthors[paper.authors[i].trim()],
+                            name: paper.authors[i].trim()
                         });
                     } else {
-                        notFoundStr += ' ' + i;
+                        notFoundStr += ' - ' + paper.authors[i] + '\n';
                         notFound = true;
                     }
                 }
@@ -444,14 +443,15 @@ jQuery(document).ready(function() {
                 if (paper.journal) {
                     // This is necessary to lower/upper case differences.
                     journalKey = JSUS.keys(resolvedJournal)[0];
-                    if (paper.journal.toUpperCase() === journalKey.toUpperCase()) {
+                    if (journalKey &&
+                        paper.journal.toUpperCase() === journalKey.toUpperCase()) {
                         journalTokenInput.tokenInput('add', {
                             id: resolvedJournal[journalKey],
                             name: paper.journal
                         });
                     } else {
                         notFound = true;
-                        notFoundStr += ' Journal not found, please add it manually: ' + paper.journal;
+                        notFoundStr += '\n\nJournal not found, please add it manually: \n- ' + paper.journal;
                     }
                 }
 
@@ -577,7 +577,7 @@ jQuery(document).ready(function() {
     }
 
     function makeResultVisible(o) {
-        if (!o.appended) {
+        if (!o.appended && o.newResult) {
             resultDiv.appendChild(o.div);
             db.idx.update(o.idx, {
                 appended: true
@@ -663,6 +663,7 @@ jQuery(document).ready(function() {
     }
 
     function createResultDiv(data, idx) {
+        // debugger;
         var div, iconSide, friend, content, actions, similar;
         var paperIcon;
         var friendLink, moreFriends, duplicatedTextSpan;
@@ -726,6 +727,7 @@ jQuery(document).ready(function() {
         sameFriendSpan.className = 'qsr_friend_more';
         sameFriendSpan.style.display = 'none';
         friend.appendChild(sameFriendSpan);
+        friend.style.whiteSpace = 'nowrap';
 
         // Content.
 
@@ -804,7 +806,7 @@ jQuery(document).ready(function() {
         content.appendChild(title);
         content.appendChild(document.createElement('br'));
         content.appendChild(underTitle);
-        content.appendChild(document.createElement('br'))
+        content.appendChild(document.createElement('br'));
         content.appendChild(abstractField);
 
         // Similar.

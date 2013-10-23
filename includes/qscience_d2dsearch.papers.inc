@@ -47,9 +47,9 @@ function _qscience_d2dsearch_import_paper(){
           $tokens = explode(' ', $authorName, 2);
           $author = array(
             'new' => TRUE,
-            'name' => $authorName,
-            'first' => sizeof($tokens) === 2 ? $tokens[0] : '',
-            'last' => sizeof($tokens) === 2 ? $tokens[1] : $tokens[0],
+            'name' => trim($authorName),
+            'first' => sizeof($tokens) === 2 ? trim($tokens[0]) : '',
+            'last' => sizeof($tokens) === 2 ? trim($tokens[1]) : trim($tokens[0]),
           );
         }
       }
@@ -87,7 +87,7 @@ function _qscience_d2dsearch_import_paper(){
       if ($journalName !== FALSE) {
         $journal = array(
           'new' => TRUE,
-          'name' => $journalName,
+          'name' => trim($journalName),
         );
       }
     }
