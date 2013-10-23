@@ -69,6 +69,7 @@ jQuery(document).ready(function() {
             o.newResult = true;
             log('info', o.friend_url + ': new result added.');
         } else {
+            o.similar.push(idxExisting);
             o.newResult = false;
             db.idx.update(idxExisting, {
                 similar: o.idx,
@@ -101,7 +102,7 @@ jQuery(document).ready(function() {
             //parentDiv = document.getElementById('qsr_similar_' + o.idx);
             parentDiv = o.div.childNodes[4];
             parentDiv.appendChild(childDiv);
-
+            debugger;
             friendCountSpan.onclick = function() {
                 if (parentDiv.style.display === '') {
                     parentDiv.style.display = 'none';
@@ -577,7 +578,7 @@ jQuery(document).ready(function() {
     }
 
     function makeResultVisible(o) {
-        if (!o.appended) {
+        if (!o.appended && o.newResult) {
             resultDiv.appendChild(o.div);
             db.idx.update(o.idx, {
                 appended: true
@@ -663,6 +664,7 @@ jQuery(document).ready(function() {
     }
 
     function createResultDiv(data, idx) {
+        // debugger;
         var div, iconSide, friend, content, actions, similar;
         var paperIcon;
         var friendLink, moreFriends, duplicatedTextSpan;
