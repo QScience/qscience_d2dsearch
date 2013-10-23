@@ -422,21 +422,20 @@ jQuery(document).ready(function() {
             success: function(data) {
                 var i, len, notFound, notFoundStr;
                 var resolvedAuthors, resolvedJournal, journalKey;
-
                 // Resolved variables are of type  {'name': id }
                 resolvedAuthors = data.authors || {};
                 resolvedJournal = data.journal || {};
-                notFoundStr = 'The following authors could not be resolved, please add them manually:';
+                notFoundStr = 'The following authors could not be resolved, please add them manually:\n';
                 i = -1, len = paper.authors.length;
 
                 for (; ++i < len;) {
-                    if (resolvedAuthors[paper.authors[i]]) {
+                    if (resolvedAuthors[paper.authors[i].trim()]) {
                         authorTokenInput.tokenInput('add', {
-                            id: resolvedAuthors[paper.authors[i]],
-                            name: paper.authors[i]
+                            id: resolvedAuthors[paper.authors[i].trim()],
+                            name: paper.authors[i].trim()
                         });
                     } else {
-                        notFoundStr += ' ' + paper.authors[i];
+                        notFoundStr += ' - ' + paper.authors[i] + '\n';
                         notFound = true;
                     }
                 }
@@ -452,7 +451,7 @@ jQuery(document).ready(function() {
                         });
                     } else {
                         notFound = true;
-                        notFoundStr += ' Journal not found, please add it manually: ' + paper.journal;
+                        notFoundStr += '\n\nJournal not found, please add it manually: \n- ' + paper.journal;
                     }
                 }
 
