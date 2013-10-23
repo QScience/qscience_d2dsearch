@@ -69,7 +69,7 @@ jQuery(document).ready(function() {
             o.newResult = true;
             log('info', o.friend_url + ': new result added.');
         } else {
-            o.similar.push(idxExisting);
+            // o.similar.push(idxExisting);
             o.newResult = false;
             db.idx.update(idxExisting, {
                 similar: o.idx,
@@ -98,11 +98,10 @@ jQuery(document).ready(function() {
         friendCountSpan = o.div.childNodes[2].childNodes[1];
         if (friendCountSpan) {
             friendCountSpan.innerHTML = '+' + o.similar.length;
-            friendCountSpan.style.display = '';
+            friendCountSpan.style.display = 'inline';
             //parentDiv = document.getElementById('qsr_similar_' + o.idx);
             parentDiv = o.div.childNodes[4];
             parentDiv.appendChild(childDiv);
-            debugger;
             friendCountSpan.onclick = function() {
                 if (parentDiv.style.display === '') {
                     parentDiv.style.display = 'none';
@@ -728,6 +727,7 @@ jQuery(document).ready(function() {
         sameFriendSpan.className = 'qsr_friend_more';
         sameFriendSpan.style.display = 'none';
         friend.appendChild(sameFriendSpan);
+        friend.style.whiteSpace = 'nowrap';
 
         // Content.
 
