@@ -839,17 +839,18 @@ jQuery(document).ready(function() {
             addToVijo.title = "Create a ViJo based on this paper.";
             addToVijo.onclick = function() {
                 data.abstract = data.abstractField;
+                var button = this;
                 vijoAPI.createViJo(data, function(data) {
                     var div = document.createElement('div');
                     div.innerHTML = '<p>The ViJo has been successfully created at this address: <a href="http://vijo.inn.ac/#/virtualjournal/' + data.virtualjournal_id + '" target="_blank">http://vijo.inn.ac/#/virtualjournal/' + data.virtualjournal_id + '</a></p>';
                     div.setAttribute('title', 'ViJo Created');
                     div.setAttribute('id', 'vijo-dialog-to-remove-added');
                     jQuery(div).dialog();
+                    button.style.backgroundColor = '#e47140';
+                    button.src = 'http://vijo.inn.ac/img/logo.png';
+                    addToVijo.alt = "ViJo already created.";
+                    addToVijo.title = "ViJo already created.";
                 });
-                this.style.backgroundColor = '#e47140';
-                this.src = 'http://vijo.inn.ac/img/logo.png';
-                addToVijo.alt = "ViJo already created.";
-                addToVijo.title = "ViJo already created.";
 
             };
             actions.appendChild(addToVijo);
